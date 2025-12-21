@@ -12,15 +12,19 @@ self.addEventListener("activate", (e) => {
 
 self.addEventListener("fetch", (e) => {
   const req = e.request;
+  const url = new URL(req.url);
 
-  // Cache-first for your site assets
-  if (req.method === "GET" && new URL(req.url).origin === location.origin) {
+  // Only cache your own site assets
+  if (req.method === "GET" && url.origin === location.origin) {
     e.respondWith(
-      caches.match(req).then((cached) => cached || fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(req, copy));
-        return res;
-      }))
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        });
+      })
     );
   }
 });

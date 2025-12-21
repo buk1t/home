@@ -24,9 +24,7 @@ body {
   overflow-x: hidden;
 }
 
-/* -------------------- */
-/* BACKGROUND */
-/* -------------------- */
+/* ---------- Background ---------- */
 
 .bg {
   position: fixed;
@@ -50,9 +48,7 @@ body {
   backdrop-filter: blur(10px);
 }
 
-/* -------------------- */
-/* PAGE WRAPPER */
-/* -------------------- */
+/* ---------- Wrapper + Header ---------- */
 
 .wrap {
   position: relative;
@@ -63,6 +59,9 @@ body {
 
 .top {
   margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .title {
@@ -77,9 +76,28 @@ body {
   color: var(--muted);
 }
 
-/* -------------------- */
-/* TWO COLUMN LAYOUT */
-/* -------------------- */
+/* Search */
+.search {
+  width: 100%;
+}
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(20, 20, 24, 0.12);
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+  font-size: 16px;
+  color: var(--text);
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: rgba(20, 20, 24, 0.22);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------- Layout ---------- */
 
 .layout {
   display: grid;
@@ -88,9 +106,7 @@ body {
   align-items: start;
 }
 
-/* -------------------- */
-/* LINK GRID + LARGE CARDS */
-/* -------------------- */
+/* ---------- Link grid (large cards) ---------- */
 
 .grid {
   display: grid;
@@ -146,14 +162,7 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* fully hide subtitle rows if any still exist */
-.card-sub {
-  display: none !important;
-}
-
-/* -------------------- */
-/* RIGHT SIDE PANELS */
-/* -------------------- */
+/* ---------- Right panels ---------- */
 
 .panel {
   border-radius: var(--radius);
@@ -182,16 +191,13 @@ body {
   font-weight: 800;
   font-size: 16px;
 }
-
 .panel-sub {
   margin-top: 6px;
   font-size: 12px;
   color: var(--muted);
 }
 
-/* -------------------- */
-/* WEATHER */
-/* -------------------- */
+/* ---------- Weather ---------- */
 
 .pill {
   font-size: 12px;
@@ -205,17 +211,14 @@ body {
 .weather-main {
   margin-top: 10px;
 }
-
 .weather-big {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .weather-emoji {
   font-size: 22px;
 }
-
 .weather-temp {
   font-size: 34px;
   font-weight: 850;
@@ -227,6 +230,8 @@ body {
   font-size: 13px;
   color: var(--muted);
 }
+/* If you want the description hidden, uncomment: */
+/* .weather-sub { display:none; } */
 
 .weather-mini {
   margin-top: 10px;
@@ -244,19 +249,12 @@ body {
   background: rgba(255, 255, 255, 0.45);
 }
 
-/* If you want the weather description hidden, uncomment:
-.weather-sub { display: none; }
-*/
-
-/* -------------------- */
-/* CHECKLIST (lined + green check) */
-/* -------------------- */
+/* ---------- Checklist (lined + green check) ---------- */
 
 .todo.todo-lines {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 0;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(20, 20, 24, 0.1);
@@ -329,9 +327,7 @@ body {
   opacity: 0.62;
 }
 
-/* -------------------- */
-/* BUTTONS */
-/* -------------------- */
+/* ---------- Buttons ---------- */
 
 .smallbtn {
   appearance: none;
@@ -367,9 +363,7 @@ body {
   flex-wrap: wrap;
 }
 
-/* -------------------- */
-/* MODAL (Archive) */
-/* -------------------- */
+/* ---------- Modal (Archive) ---------- */
 
 .modal {
   position: fixed;
@@ -462,19 +456,7 @@ body {
   background: rgba(255, 255, 255, 0.75);
 }
 
-/* -------------------- */
-/* FOOTER */
-/* -------------------- */
-
-.foot {
-  margin-top: 18px;
-  font-size: 12px;
-  color: rgba(20, 20, 24, 0.55);
-}
-
-/* -------------------- */
-/* RESPONSIVE */
-/* -------------------- */
+/* ---------- Responsive ---------- */
 
 @media (max-width: 1050px) {
   .grid {

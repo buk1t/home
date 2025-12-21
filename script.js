@@ -1,6 +1,7 @@
 // ============================================================
 // Home page script (ONE file):
 // - Subtitle clock (minute-synced, no drift)
+// - Search bar (same-tab): URL or Google search
 // - Weather (Open-Meteo, no key)
 // - Apple-Notes-ish checklist:
 //    Enter => new row
@@ -22,6 +23,16 @@ function uuid() {
   );
 }
 
+function focusInputById(id) {
+  const inp = document.querySelector(`input[data-task-id="${id}"]`);
+  if (inp) {
+    inp.focus();
+    const v = inp.value;
+    try { inp.setSelectionRange(v.length, v.length); } catch {}
+  }
+}
+
+// ---------- Subtitle clock (minute-synced) ----------
 function setSubtitle() {
   const el = document.getElementById("subtitle");
   if (!el) return;
@@ -36,13 +47,11 @@ function setSubtitle() {
   });
 }
 
-// Minute-synced clock so it flips exactly at :00
 let subtitleTimeout = null;
 let subtitleInterval = null;
 
 function startAccurateSubtitleClock() {
   setSubtitle();
-
   if (subtitleTimeout) clearTimeout(subtitleTimeout);
   if (subtitleInterval) clearInterval(subtitleInterval);
 
@@ -56,25 +65,60 @@ function startAccurateSubtitleClock() {
   }, msUntilNextMinute);
 }
 
-function focusInputById(id) {
-  const inp = document.querySelector(`input[data-task-id="${id}"]`);
-  if (inp) {
-    inp.focus();
-    const v = inp.value;
-    try {
-      inp.setSelectionRange(v.length, v.length);
-    } catch {}
-  }
+// ---------- Search (same-tab omnibox) ----------
+function isLikelyUrl(text) {
+  const s = text.trim();
+  if (/^https?:\/\//i.test(s)) return true;
+  if (!/\s/.test(s) && /\.[a-z]{2,}([/:?#]|$)/i.test(s)) return true;
+  return false;
+}
+
+function normalizeUrl(text) {
+  const s = text.trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  return "https://" + s;
+}
+
+function searchUrl(query) {
+  const q = encodeURIComponent(query.trim());
+  return `https://www.google.com/search?q=${q}`;
+}
+
+function initSearch() {
+  const form = document.getElementById("searchForm");
+  const input = document.getElementById("searchInput");
+  if (!form || !input) return;
+
+  // "/" focuses search (unless you're already typing somewhere)
+  window.addEventListener("keydown", (e) => {
+    const tag = (document.activeElement?.tagName || "").toLowerCase();
+    const typing = tag === "input" || tag === "textarea";
+
+    if (e.key === "/" && !typing) {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = (input.value || "").trim();
+    if (!text) return;
+
+    // same tab navigation
+    window.location.href = isLikelyUrl(text) ? normalizeUrl(text) : searchUrl(text);
+  });
 }
 
 // ---------- State ----------
 function defaultState() {
+  const now = Date.now();
   return {
     active: [
-      { id: uuid(), text: "Math homework", created: Date.now(), checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Schoology check", created: Date.now(), checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Study (SAT/AP)", created: Date.now(), checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Pack / prep for tomorrow", created: Date.now(), checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Math homework", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Schoology check", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Study (SAT/AP)", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Pack / prep for tomorrow", created: now, checked: false, pendingArchiveAt: null },
     ],
     archived: [],
   };
@@ -84,8 +128,10 @@ function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (!raw) return defaultState();
+
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return defaultState();
+
     return {
       active: Array.isArray(parsed.active) ? parsed.active : defaultState().active,
       archived: Array.isArray(parsed.archived) ? parsed.archived : [],
@@ -96,9 +142,7 @@ function loadState() {
 }
 
 function saveState(state) {
-  try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(state));
-  } catch {}
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {}
 }
 
 // ---------- Checklist render ----------
@@ -111,7 +155,6 @@ function renderActive(state) {
     const row = document.createElement("div");
     row.className = "todo-item" + (t.checked ? " done" : "");
 
-    // checkbox
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = !!t.checked;
@@ -124,7 +167,6 @@ function renderActive(state) {
       renderArchive(state);
     });
 
-    // text input
     const textWrap = document.createElement("div");
     textWrap.className = "todo-text";
 
@@ -140,10 +182,8 @@ function renderActive(state) {
     });
 
     input.addEventListener("keydown", (e) => {
-      // ENTER: new row below
       if (e.key === "Enter") {
         e.preventDefault();
-
         const newTask = {
           id: uuid(),
           text: "",
@@ -151,7 +191,6 @@ function renderActive(state) {
           checked: false,
           pendingArchiveAt: null,
         };
-
         state.active.splice(idx + 1, 0, newTask);
         saveState(state);
         renderActive(state);
@@ -159,24 +198,20 @@ function renderActive(state) {
         return;
       }
 
-      // BACKSPACE on empty: delete row
       if (e.key === "Backspace") {
         const val = input.value || "";
         if (val.length === 0) {
           if (state.active.length === 1) return;
-
           e.preventDefault();
           state.active.splice(idx, 1);
           saveState(state);
           renderActive(state);
-
           const target = state.active[Math.max(0, idx - 1)] || state.active[0];
           requestAnimationFrame(() => focusInputById(target.id));
           return;
         }
       }
 
-      // Up/Down arrows move between rows
       if (e.key === "ArrowUp") {
         const prev = state.active[idx - 1];
         if (prev) {
@@ -184,6 +219,7 @@ function renderActive(state) {
           focusInputById(prev.id);
         }
       }
+
       if (e.key === "ArrowDown") {
         const next = state.active[idx + 1];
         if (next) {
@@ -194,10 +230,8 @@ function renderActive(state) {
     });
 
     textWrap.appendChild(input);
-
     row.appendChild(cb);
     row.appendChild(textWrap);
-
     root.appendChild(row);
   });
 }
@@ -265,12 +299,10 @@ function renderArchive(state) {
       row.appendChild(text);
       row.appendChild(restore);
       row.appendChild(del);
-
       list.appendChild(row);
     });
 }
 
-// Move checked tasks to archive after 5 seconds
 function tickArchive(state) {
   const now = Date.now();
   let moved = false;
@@ -327,7 +359,6 @@ function wxFromCode(code) {
 }
 
 async function loadWeather() {
-  // Pittsburgh default
   const lat = 40.4406;
   const lon = -79.9959;
 
@@ -363,6 +394,8 @@ async function loadWeather() {
 
     if (tempEl) tempEl.textContent = `${t}°`;
     if (emojiEl) emojiEl.textContent = wx.e;
+
+    // You said you might hide this in CSS; still set it safely
     if (descEl) descEl.textContent = `${wx.d} • Feels like ${feels}°`;
 
     if (miniEl) {
@@ -377,9 +410,10 @@ async function loadWeather() {
   }
 }
 
-// ---------- Init (ONE init) ----------
+// ---------- Init ----------
 (function init() {
   startAccurateSubtitleClock();
+  initSearch();
 
   const state = loadState();
   saveState(state);
@@ -387,7 +421,6 @@ async function loadWeather() {
   renderActive(state);
   renderArchive(state);
 
-  // Archive modal open/close (backdrop click + Esc)
   document.getElementById("archiveBtn")?.addEventListener("click", openArchive);
   document.getElementById("archiveClose")?.addEventListener("click", closeArchive);
 
@@ -395,14 +428,13 @@ async function loadWeather() {
     if (e.key === "Escape") closeArchive();
   });
 
-  // Archive ticking
   setInterval(() => tickArchive(state), 300);
 
-  // Weather
   loadWeather();
   setInterval(loadWeather, 20 * 60 * 1000);
 })();
 
+// Service worker (for fast loads after first visit)
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
