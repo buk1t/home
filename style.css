@@ -467,3 +467,16 @@ body {
     font-size: 34px;
   }
 }
+
+.version {
+  position: fixed;
+  bottom: 14px;
+  right: 16px;
+
+  font-size: 12px;
+  color: rgba(20, 20, 24, 0.45);
+  letter-spacing: 0.02em;
+
+  user-select: none;
+  pointer-events: none;
+}

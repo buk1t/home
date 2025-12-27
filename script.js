@@ -5,6 +5,7 @@
 // - Checklist with archive modal
 
 const STORE_KEY = "home_tasks_v4";
+const APP_VERSION = "1.3.0";
 
 // ---------- Small utils ----------
 const $ = (sel) => document.querySelector(sel);
@@ -351,6 +352,10 @@ function forceCardsSameTab() {
 
 // ---------- Init ----------
 (function init() {
+  // Set version label (GitHub Pages sanity check)
+  const v = document.getElementById("version");
+  if (v) v.textContent = `v${APP_VERSION}`;
+
   startSubtitleClock();
   initSearch();
   forceCardsSameTab();
@@ -363,7 +368,9 @@ function forceCardsSameTab() {
 
   $("#archiveBtn")?.addEventListener("click", openArchive);
   $("#archiveClose")?.addEventListener("click", closeArchive);
-  window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeArchive(); });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeArchive();
+  });
 
   setInterval(() => tickArchive(state), 300);
 
@@ -375,3 +382,5 @@ function forceCardsSameTab() {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
+
+document.getElementById("version").textContent = `v${APP_VERSION}`;
