@@ -1,4 +1,4 @@
-const CACHE = "home-2.1.0";
+const CACHE = "home-3.0.0";
 
 const CORE = [
   "./",
@@ -6,6 +6,10 @@ const CORE = [
   "./style.css",
   "./script.js",
   "./sw.js",
+  "./settings.html",
+  "./settings.js",
+  "./version.js",
+  "./icons.js",
   "./assets/fonts/Inter-roman.ttf",
   "./assets/fonts/Inter-italic.ttf", // delete this line if you didn't keep italic
 ];

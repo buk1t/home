@@ -1,12 +1,14 @@
 // Home page script
 // - Subtitle clock (minute-synced)
 // - Search bar auto-focus + same-tab navigation
-// - Weather (Open-Meteo)
+// - Weather (Open-Meteo) + custom city via Settings
+// - Links grid rendered from localStorage (editable via Settings)
 // - Checklist with archive modal
 // - Service worker registration
 
-const APP_VERSION = "2.0.0";
-const STORE_KEY = "home.state.v1";
+const STORE_KEY = "home.state.v1";      // checklist state
+const LINKS_KEY = "home.links.v1";      // links grid
+const WEATHER_KEY = "home.weather.v1";  // custom city (lat/lon/tz/name)
 
 // ---------- Small utils ----------
 const $ = (sel) => document.querySelector(sel);
@@ -16,6 +18,29 @@ function uuid() {
     crypto?.randomUUID?.() ||
     `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
   );
+}
+
+function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 function focusInputByTaskId(id) {
@@ -32,12 +57,18 @@ function focusInputByTaskId(id) {
 function setSubtitle() {
   const el = $("#subtitle");
   if (!el) return;
+
+  const prefs = getWeatherPrefs(); // uses WEATHER_KEY + defaultWeatherPrefs()
+  const tz = prefs?.tz || "America/New_York";
+
   el.textContent = new Date().toLocaleString(undefined, {
     weekday: "long",
     month: "long",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: tz,
+    timeZoneName: "short",
   });
 }
 
@@ -106,15 +137,123 @@ function initSearch() {
   });
 }
 
-// ---------- State ----------
+// ---------- Links Grid ----------
+function defaultLinks() {
+  // Used only if no links exist yet.
+  return [
+    {
+    id: uuid(),
+    title: "Netflix",
+    url: "https://www.netflix.com",
+    icon: "tv",
+  },
+  {
+    id: uuid(),
+    title: "Google Drive",
+    url: "https://drive.google.com",
+    icon: "folder",
+  },
+  {
+    id: uuid(),
+    title: "Instagram",
+    url: "https://www.instagram.com",
+    icon: "camera",
+  },
+  {
+    id: uuid(),
+    title: "HBO Max",
+    url: "https://www.max.com",
+    icon: "play",
+  },
+  {
+    id: uuid(),
+    title: "Outlook",
+    url: "https://outlook.live.com",
+    icon: "mail",
+  },
+  {
+    id: uuid(),
+    title: "Zillow",
+    url: "https://www.zillow.com",
+    icon: "home",
+  },
+  ];
+}
+
+function getLinks() {
+  const links = loadJSON(LINKS_KEY, null);
+  if (Array.isArray(links) && links.length) return links;
+
+  const seeded = defaultLinks();
+  saveJSON(LINKS_KEY, seeded);
+  return seeded;
+}
+
+function iconSvg(kind) {
+  const list = window.ICONS || [];
+  const icon = list.find((i) => i.id === kind) || list.find((i) => i.id === "link");
+  const path = icon?.path || "";
+  return `
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      ${path}
+    </svg>
+  `;
+}
+
+function renderLinksGrid() {
+  const root = document.getElementById("linksGrid");
+  if (!root) return;
+
+  const links = getLinks();
+  root.innerHTML = "";
+
+  if (!links.length) {
+    root.innerHTML = `<a class="card" href="./settings.html">
+      <div class="card-top">
+        <span class="icon" aria-hidden="true">${iconSvg("link")}</span>
+        <div class="card-title">Add links in Settings</div>
+      </div>
+    </a>`;
+    return;
+  }
+
+  links.forEach((l) => {
+    const title = (l.title || "").trim() || "Untitled";
+    let url = (l.url || "").trim();
+
+    // If it's blank, send them to Settings so it doesn't feel dead.
+    if (!url) url = "./settings.html";
+
+    // If user omitted scheme but it looks like a domain, fix it.
+    if (url !== "./settings.html" && !/^https?:\/\//i.test(url) && url.includes(".")) {
+      url = "https://" + url;
+    }
+
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = url;
+
+    a.innerHTML = `
+      <div class="card-top">
+        <span class="icon" aria-hidden="true">${iconSvg(l.icon || "link")}</span>
+        <div class="card-title">${escapeHtml(title)}</div>
+      </div>
+    `;
+
+    root.appendChild(a);
+  });
+}
+
+// ---------- Checklist State ----------
 function defaultState() {
   const now = Date.now();
   return {
     active: [
-      { id: uuid(), text: "Math homework", created: now, checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Schoology check", created: now, checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Study (SAT/AP)", created: now, checked: false, pendingArchiveAt: null },
-      { id: uuid(), text: "Pack / prep for tomorrow", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Do laundry", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Go grocery shopping", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Buy valentines gift", created: now, checked: false, pendingArchiveAt: null },
+      { id: uuid(), text: "Walk dog", created: now, checked: false, pendingArchiveAt: null },
     ],
     archived: [],
   };
@@ -316,6 +455,34 @@ function closeArchive() {
 }
 
 // ---------- Weather ----------
+function defaultWeatherPrefs() {
+  // DEFAULT: Seattle
+  return {
+    name: "Seattle, WA, United States",
+    lat: 47.6062,
+    lon: -122.3321,
+    tz: "America/Los_Angeles",
+  };
+}
+
+function getWeatherPrefs() {
+  const prefs = loadJSON(WEATHER_KEY, null);
+  if (
+    prefs &&
+    typeof prefs === "object" &&
+    typeof prefs.lat === "number" &&
+    typeof prefs.lon === "number"
+  ) {
+    return {
+      name: prefs.name || defaultWeatherPrefs().name,
+      lat: prefs.lat,
+      lon: prefs.lon,
+      tz: prefs.tz || defaultWeatherPrefs().tz,
+    };
+  }
+  return defaultWeatherPrefs();
+}
+
 function wxFromCode(code) {
   if (code === 0) return { e: "☀️", d: "Clear" };
   if (code === 1 || code === 2) return { e: "🌤️", d: "Partly cloudy" };
@@ -328,8 +495,15 @@ function wxFromCode(code) {
 }
 
 async function loadWeather() {
-  const lat = 40.4406;
-  const lon = -79.9959;
+  const prefs = getWeatherPrefs();
+  const lat = prefs.lat;
+  const lon = prefs.lon;
+
+  const cityPill = $("#weatherCity");
+  if (cityPill) {
+  const label = (prefs.name || "Weather").split(",")[0].trim();
+  cityPill.textContent = label || "Weather";
+}
 
   const url =
     "https://api.open-meteo.com/v1/forecast" +
@@ -337,7 +511,7 @@ async function loadWeather() {
     `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m` +
     `&daily=temperature_2m_max,temperature_2m_min` +
     `&temperature_unit=fahrenheit&wind_speed_unit=mph` +
-    `&timezone=America%2FNew_York`;
+    `&timezone=${encodeURIComponent(prefs.tz || "America/Los_Angeles")}`;
 
   const tempEl = $("#wxTemp");
   const descEl = $("#wxDesc");
@@ -377,12 +551,15 @@ async function loadWeather() {
 
 // ---------- Init ----------
 (function init() {
-  const v = document.getElementById("version");
-  if (v) v.textContent = `v${APP_VERSION}`;
+  window.renderVersionBadge?.();
 
   startSubtitleClock();
   initSearch();
 
+  // links grid
+  renderLinksGrid();
+
+  // checklist
   const state = loadState();
   saveState(state);
 
@@ -398,6 +575,7 @@ async function loadWeather() {
   // 500ms is plenty and reduces churn vs 300ms
   setInterval(() => tickArchive(state), 500);
 
+  // weather
   loadWeather();
   setInterval(loadWeather, 20 * 60 * 1000);
 })();

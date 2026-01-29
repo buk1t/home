@@ -139,6 +139,7 @@ body {
   inset: 0;
   background: var(--bg-grad);
   transition: background 220ms ease;
+  z-index: 0;
 }
 
 .overlay {
@@ -147,6 +148,7 @@ body {
   background: var(--overlay-grad);
   backdrop-filter: blur(10px);
   transition: background 220ms ease;
+  z-index: 0;
 }
 
 /* =========================
@@ -155,6 +157,7 @@ body {
 
 .wrap {
   position: relative;
+  z-index: 1;
   max-width: 1180px;
   margin: 0 auto;
   padding: 28px 18px 48px;
@@ -167,14 +170,13 @@ body {
   gap: 12px;
 }
 
-@media (min-width: 720px) {
-  .top {
-    grid-template-columns: 1fr minmax(420px, 760px);
-    align-items: center;
-  }
-  .search {
-    justify-self: stretch;
-  }
+/* Header stability */
+.top-left {
+  margin-bottom: 1vw;
+}
+.top-left,
+.top-right {
+  min-width: 0;
 }
 
 .title {
@@ -186,9 +188,24 @@ body {
 
 .subtitle {
   margin-top: 8px;
+  margin-bottom: 0px;
   font-size: 14px;
   font-weight: 500;
   color: var(--muted);
+}
+
+/* Header right side (actions + search) */
+.top-right {
+  display: grid;
+  gap: 10px;
+}
+
+.top-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Search */
@@ -198,6 +215,7 @@ body {
 
 .search-input {
   width: 100%;
+  min-width: 0;
   padding: 18px 20px;
   border-radius: 24px;
   border: 1px solid var(--stroke);
@@ -213,6 +231,25 @@ body {
 .search-input:focus {
   border-color: var(--stroke-strong);
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+}
+
+@media (min-width: 720px) {
+  .top {
+    grid-template-columns: 1fr minmax(420px, 760px);
+    align-items: end;
+  }
+  .search {
+    justify-self: stretch;
+  }
+  .top-right {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 560px) {
+  .title {
+    font-size: 34px;
+  }
 }
 
 /* =========================
@@ -258,9 +295,6 @@ body {
   .grid {
     grid-template-columns: 1fr;
   }
-  .title {
-    font-size: 34px;
-  }
 }
 
 /* =========================
@@ -290,6 +324,7 @@ body {
   align-items: center;
   gap: 12px;
   width: 100%;
+  min-width: 0;
 }
 
 .card-title {
@@ -310,7 +345,7 @@ body {
 }
 
 /* =========================
-   Icons (minimal, less chunky)
+   Icons
    ========================= */
 
 .icon {
@@ -644,8 +679,100 @@ body {
   bottom: 14px;
   right: 16px;
   font-size: 12px;
-  color: rgba(20, 20, 24, 0.45);
+  color: var(--muted);
+  opacity: 0.7;
   letter-spacing: 0.02em;
   user-select: none;
   pointer-events: none;
+}
+/* =========================
+   Link button styles
+   ========================= */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+  border-radius: 999px;
+
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+  color: var(--text);
+
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  transition: transform 140ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, background 150ms ease;
+}
+
+/* smaller utility version for header */
+.back-link--small {
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 650;
+  opacity: 0.92;
+}
+
+.back-link:hover {
+  transform: translateY(-1px);
+  border-color: var(--stroke-strong);
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.back-link:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.back-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 55%, transparent 45%),
+    0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+/* Settings icon button (header) */
+.iconbtn {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+  color: var(--text);
+
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  transition: transform 140ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, background 150ms ease;
+}
+
+.iconbtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--stroke-strong);
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.iconbtn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.iconbtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 55%, transparent 45%),
+    0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.iconbtn .ico {
+  width: 18px;
+  height: 18px;
 }
