@@ -64,6 +64,38 @@
 
             <div id="linksList" style="margin-top: 12px"></div>
           </div>
+          <!-- Import / Export -->
+          <div class="panel" style="margin-top: 14px">
+            <div class="panel-head">
+              <div class="panel-title">Import / Export</div>
+            </div>
+            <div class="panel-sub">
+              Backup or move your Home setup (links, weather, checklist) to
+              another browser.
+            </div>
+
+            <div class="panel-actions">
+              <button class="ghostbtn" id="exportBtn" type="button">
+                Export settings
+              </button>
+
+              <button class="ghostbtn" id="importBtn" type="button">
+                Import settings
+              </button>
+              <input
+                id="importFile"
+                type="file"
+                accept="application/json"
+                style="display: none"
+              />
+            </div>
+
+            <div
+              class="panel-sub"
+              id="importExportMsg"
+              style="margin-top: 10px"
+            ></div>
+          </div>
 
           <!-- Add/Edit Modal -->
           <div class="modal" id="linkModal" aria-hidden="true">

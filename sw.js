@@ -1,4 +1,4 @@
-const CACHE = "home-3.0.0";
+const CACHE = "home-3.1.0";
 
 const CORE = [
   "./",

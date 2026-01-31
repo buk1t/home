@@ -6,6 +6,193 @@ const WEATHER_KEY = "home.weather.v1";
 
 const $ = (sel) => document.querySelector(sel);
 
+// ----- Import / Export (prefix-based, plain text) -----
+
+const EXPORT_PREFIX = "home.";
+
+function setMsg(text) {
+  const el = $("#importExportMsg");
+  if (!el) return;
+  el.textContent = text || "";
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+function toB64(str) {
+  // Handle unicode safely
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function fromB64(b64) {
+  // Handle unicode safely
+  return decodeURIComponent(escape(atob(b64)));
+}
+
+function listPrefixedKeys(prefix) {
+  const out = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(prefix)) out.push(k);
+  }
+  return out.sort();
+}
+
+function exportSettingsPlainText() {
+  const keys = listPrefixedKeys(EXPORT_PREFIX);
+
+  const meta = [
+    "# buk1t-home settings export",
+    `# exportedAt: ${new Date().toISOString()}`,
+    `# version: ${(window.APP_VERSION || "dev")}`,
+    "",
+  ].join("\n");
+
+  if (!keys.length) {
+    downloadText("home-settings.txt", meta + "# (no keys found)\n");
+    setMsg("Exported (empty). No home.* settings found yet.");
+    return;
+  }
+
+  let body = meta;
+
+  for (const k of keys) {
+    const raw = localStorage.getItem(k);
+    if (raw == null) continue;
+
+    // raw is already a string (usually JSON). Store it safely.
+    const encoded = toB64(raw);
+
+    body += `[${k}]\n${encoded}\n\n`;
+  }
+
+  const stamp = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
+  downloadText(`home-settings-${stamp}.txt`, body);
+  setMsg("Exported. (Check your Downloads folder.)");
+}
+
+/**
+ * Parse format:
+ * [key]
+ * base64value
+ *
+ * Repeated...
+ */
+function parsePlainTextExport(text) {
+  const lines = String(text || "").split(/\r?\n/);
+
+  const data = {};
+  let currentKey = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // ignore comments/blank lines
+    if (!line || line.startsWith("#")) continue;
+
+    // section header
+    if (line.startsWith("[") && line.endsWith("]")) {
+      currentKey = line.slice(1, -1).trim();
+      continue;
+    }
+
+    // value line
+    if (currentKey) {
+      // accept first non-empty line after header as value
+      data[currentKey] = line;
+      currentKey = null;
+    }
+  }
+
+  return data;
+}
+
+function validateImportedTextMap(map) {
+  if (!map || typeof map !== "object") return { ok: false, reason: "Bad file format." };
+
+  const keys = Object.keys(map).filter((k) => k.startsWith(EXPORT_PREFIX));
+  if (!keys.length) return { ok: false, reason: "No home.* keys found in file." };
+
+  // Ensure values look like base64-ish
+  for (const k of keys) {
+    const v = map[k];
+    if (typeof v !== "string" || v.length < 2) {
+      return { ok: false, reason: `Missing value for ${k}` };
+    }
+  }
+
+  return { ok: true, keys };
+}
+
+async function importSettingsPlainTextFile(file) {
+  const text = await file.text();
+  const map = parsePlainTextExport(text);
+  const v = validateImportedTextMap(map);
+
+  if (!v.ok) {
+    setMsg(`Import failed: ${v.reason}`);
+    return;
+  }
+
+  // Overwrite ONLY home.* keys. (We’ll also remove existing home.* first,
+  // so deleted keys in the file actually disappear.)
+  const existing = listPrefixedKeys(EXPORT_PREFIX);
+  for (const k of existing) localStorage.removeItem(k);
+
+  for (const k of v.keys) {
+    try {
+      const raw = fromB64(map[k]);
+      localStorage.setItem(k, raw);
+    } catch {
+      setMsg(`Import failed: Could not decode ${k}`);
+      return;
+    }
+  }
+
+  setMsg("Imported! Reloading…");
+  setTimeout(() => window.location.reload(), 350);
+}
+
+function wireImportExport() {
+  const exportBtn = $("#exportBtn");
+  const importBtn = $("#importBtn");
+  const importFile = $("#importFile");
+
+  exportBtn?.addEventListener("click", exportSettingsPlainText);
+
+  importBtn?.addEventListener("click", () => {
+    setMsg("");
+    importFile?.click();
+  });
+
+  importFile?.addEventListener("change", async () => {
+    const file = importFile.files?.[0];
+    importFile.value = ""; // allow importing same file again
+    if (!file) return;
+
+    const ok = confirm(
+      "Importing will overwrite ALL current home.* settings (links, weather, checklist, etc). Continue?"
+    );
+    if (!ok) return;
+
+    try {
+      await importSettingsPlainTextFile(file);
+    } catch {
+      setMsg("Import failed: Could not read the file.");
+    }
+  });
+}
 function uuid() {
   return (
     crypto?.randomUUID?.() ||
@@ -399,6 +586,7 @@ function deleteLinkFromModal() {
   setCityPill();
   renderLinksList();
   renderArchive();
+  wireImportExport();
 
 
   // weather search
