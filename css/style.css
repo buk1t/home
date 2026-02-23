@@ -33,10 +33,6 @@ html[data-preview="light"] {
 
 /* ---------- Favicon ---------- */
 
-:root {
-  --favicon: #4c91b3;
-}
-
 /* ---------- FORCE LIGHT ---------- */
 :root[data-scheme="light"],
 :root[data-preview="light"],
@@ -1040,4 +1036,276 @@ svg {
 
 .version-pill:active {
   transform: translateY(0px);
+}
+
+/* ---------- Select / Dropdown ---------- */
+/* Use: <select class="select" ...> */
+.select {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px 0 14px; /* room for chevron */
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+  outline: none;
+  box-shadow: none;
+
+  /* remove default styling where possible */
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* smoother */
+  transition: border-color 140ms ease, transform 140ms ease,
+    background 140ms ease;
+}
+
+.select:hover {
+  border-color: var(--stroke-strong);
+}
+
+.select:focus-visible {
+  border-color: var(--stroke-strong);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}
+
+/* Disabled */
+.select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Wrapper that provides a consistent chevron */
+.select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.8;
+
+  /* chevron via inline SVG (uses currentColor-ish look) */
+  background: no-repeat center / 18px 18px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* Make chevron not blinding in light mode */
+html[data-scheme="light"] .select-wrap::after {
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* Dropdown menu options (limited styling support across browsers) */
+.select option {
+  color: #111;
+}
+
+/* Safari: when select menu opens, it uses native UI; keep it readable */
+@supports (-webkit-touch-callout: none) {
+  .select option {
+    color: initial;
+  }
+}
+
+/* ---------- Nav Dock (bottom-right, expands LEFT, never off-screen) ---------- */
+
+#navDock {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 80;
+}
+
+/* whole widget */
+.navdock-wrap {
+  position: relative;
+  display: grid;
+  place-items: end;
+}
+
+/* launcher (three dots) */
+.navdock-launch {
+  appearance: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: color-mix(in srgb, var(--card) 82%, transparent 18%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+
+  transition: transform 140ms ease, border-color 140ms ease,
+    background 140ms ease, box-shadow 140ms ease;
+}
+
+.navdock-launch:hover {
+  transform: translateY(-1px);
+  border-color: var(--stroke-strong);
+  background: color-mix(in srgb, var(--surface) 75%, transparent 25%);
+  box-shadow: 0 22px 66px rgba(0, 0, 0, 0.18);
+}
+
+.navdock-launch:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.navdock-launch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 55%, transparent 45%),
+    0 22px 66px rgba(0, 0, 0, 0.18);
+}
+
+/* dots */
+.navdock-launch .dots {
+  display: inline-grid;
+  gap: 5px;
+}
+.navdock-launch .dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 62%, transparent 38%);
+  display: block;
+}
+
+/* tray (hidden until open) */
+.navdock-tray {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+
+  /* Expand LEFT: anchor right edge, then translate left when open */
+  transform: translateX(-6px);
+  opacity: 0;
+  pointer-events: none;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  height: 52px;
+  padding: 6px 8px 6px 6px;
+  border-radius: 999px;
+
+  border: 1px solid var(--stroke);
+  background: color-mix(in srgb, var(--card) 76%, transparent 24%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.18);
+
+  /* important: keep the tray's RIGHT edge aligned with the launcher */
+  transform-origin: 100% 100%;
+  transition: opacity 160ms ease, transform 180ms ease;
+}
+
+/* open state */
+.navdock-wrap[data-open="true"] .navdock-tray {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(
+    calc(-48px - 10px)
+  ); /* slide left by launcher width + gap */
+}
+
+/* keep launcher visible even when open */
+.navdock-wrap[data-open="true"] .navdock-launch {
+  border-color: var(--stroke-strong);
+}
+
+/* nav buttons inside tray */
+.navbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  height: 40px;
+  padding: 0 12px 0 10px;
+
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: transform 140ms ease, border-color 140ms ease,
+    background 140ms ease;
+}
+
+.navbtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--stroke);
+  background: color-mix(in srgb, var(--surface) 60%, transparent 40%);
+}
+
+.navbtn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.navbtn-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--icon-border);
+  background: var(--icon-bg);
+  color: var(--icon-fg);
+}
+
+.nav-ico {
+  width: 18px;
+  height: 18px;
+}
+
+/* label */
+.navbtn-label {
+  font-weight: 720;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--text) 92%, transparent 8%);
+}
+
+/* active page ring */
+.navbtn.is-active {
+  border-color: var(--stroke-strong);
+  background: color-mix(in srgb, var(--surface) 68%, transparent 32%);
+}
+
+/* small screens: keep labels hidden to stay compact */
+@media (max-width: 720px) {
+  .navbtn {
+    padding: 0 10px;
+    gap: 0;
+  }
+  .navbtn-label {
+    display: none;
+  }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .navdock-tray,
+  .navdock-launch,
+  .navbtn {
+    transition: none !important;
+  }
 }

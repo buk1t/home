@@ -4,6 +4,7 @@ const THEME_KEY = "home.theme.v1";
 const STORE_KEY = "home.state.v1";
 const LINKS_KEY = "home.links.v1";
 const WEATHER_KEY = "home.weather.v1";
+const SEARCH_KEY = "home.search.v1";
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -37,7 +38,6 @@ function toB64(str) {
 }
 
 function fromB64(b64) {
-  // Handle unicode safely
   return decodeURIComponent(escape(atob(b64)));
 }
 
@@ -51,9 +51,7 @@ function listPrefixedKeys(prefix) {
 }
 
 function exportSettingsPlainText() {
-  const keys = Array.from(
-  new Set([...listPrefixedKeys(EXPORT_PREFIX), THEME_KEY])
-  ).sort();
+  const keys = Array.from(new Set([...listPrefixedKeys(EXPORT_PREFIX), THEME_KEY])).sort();
 
   const meta = [
     "# buk1t-home settings export",
@@ -74,9 +72,7 @@ function exportSettingsPlainText() {
     const raw = localStorage.getItem(k);
     if (raw == null) continue;
 
-    // raw is already a string (usually JSON). Store it safely.
     const encoded = toB64(raw);
-
     body += `[${k}]\n${encoded}\n\n`;
   }
 
@@ -85,13 +81,6 @@ function exportSettingsPlainText() {
   setMsg("Exported. (Check your Downloads folder.)");
 }
 
-/**
- * Parse format:
- * [key]
- * base64value
- *
- * Repeated...
- */
 function parsePlainTextExport(text) {
   const lines = String(text || "").split(/\r?\n/);
 
@@ -101,18 +90,14 @@ function parsePlainTextExport(text) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
-    // ignore comments/blank lines
     if (!line || line.startsWith("#")) continue;
 
-    // section header
     if (line.startsWith("[") && line.endsWith("]")) {
       currentKey = line.slice(1, -1).trim();
       continue;
     }
 
-    // value line
     if (currentKey) {
-      // accept first non-empty line after header as value
       data[currentKey] = line;
       currentKey = null;
     }
@@ -127,7 +112,6 @@ function validateImportedTextMap(map) {
   const keys = Object.keys(map).filter((k) => k.startsWith(EXPORT_PREFIX));
   if (!keys.length) return { ok: false, reason: "No home.* keys found in file." };
 
-  // Ensure values look like base64-ish
   for (const k of keys) {
     const v = map[k];
     if (typeof v !== "string" || v.length < 2) {
@@ -148,8 +132,7 @@ async function importSettingsPlainTextFile(file) {
     return;
   }
 
-  // Overwrite ONLY home.* keys. (We’ll also remove existing home.* first,
-  // so deleted keys in the file actually disappear.)
+  // Overwrite ONLY home.* keys (also clears existing so removed keys disappear)
   const existing = listPrefixedKeys(EXPORT_PREFIX);
   for (const k of existing) localStorage.removeItem(k);
 
@@ -196,6 +179,8 @@ function wireImportExport() {
     }
   });
 }
+
+// ----- Small utils -----
 function uuid() {
   return (
     crypto?.randomUUID?.() ||
@@ -243,6 +228,101 @@ function iconSVG(iconId) {
       ${icon.path}
     </svg>
   `;
+}
+
+// =========================
+// NEW: Search Engine Setting
+// =========================
+// Requires these optional elements in settings.html:
+//   #searchEngine (select)
+//   #searchCustom (input)
+//   #customSearchWrap (div)
+//   #currentSearchPill (pill)
+// If not present, this section does nothing.
+
+function defaultSearchPrefs() {
+  return {
+    engine: "google",
+    customTemplate: "https://www.google.com/search?q={q}",
+  };
+}
+
+function getSearchPrefs() {
+  const prefs = loadJSON(SEARCH_KEY, null);
+  if (!prefs || typeof prefs !== "object") return defaultSearchPrefs();
+
+  const engine = String(prefs.engine || "").trim().toLowerCase() || "google";
+  const customTemplate =
+    String(prefs.customTemplate || "").trim() || defaultSearchPrefs().customTemplate;
+
+  return { engine, customTemplate };
+}
+
+function setSearchPrefs(next) {
+  const engine = String(next?.engine || "google").trim().toLowerCase() || "google";
+  const customTemplate =
+    String(next?.customTemplate || "").trim() || defaultSearchPrefs().customTemplate;
+
+  saveJSON(SEARCH_KEY, { engine, customTemplate });
+}
+
+function prettyEngineName(engine) {
+  switch (engine) {
+    case "ddg":
+      return "DuckDuckGo";
+    case "brave":
+      return "Brave";
+    case "bing":
+      return "Bing";
+    case "kagi":
+      return "Kagi";
+    case "perplexity":
+      return "Perplexity";
+    case "custom":
+      return "Custom";
+    case "google":
+    default:
+      return "Google";
+  }
+}
+
+function syncSearchUI() {
+  const sel = $("#searchEngine");
+  const wrap = $("#customSearchWrap");
+  const inp = $("#searchCustom");
+  const pill = $("#currentSearchPill");
+
+  if (!sel) return; // feature not present in HTML
+
+  const prefs = getSearchPrefs();
+
+  sel.value = prefs.engine || "google";
+  if (inp) inp.value = prefs.customTemplate || defaultSearchPrefs().customTemplate;
+
+  const showCustom = prefs.engine === "custom";
+  if (wrap) wrap.style.display = showCustom ? "block" : "none";
+
+  if (pill) pill.textContent = prettyEngineName(prefs.engine);
+}
+
+function wireSearchEngine() {
+  const sel = $("#searchEngine");
+  const inp = $("#searchCustom");
+
+  if (!sel) return; // feature not present in HTML
+
+  sel.addEventListener("change", () => {
+    const prefs = getSearchPrefs();
+    setSearchPrefs({ engine: sel.value, customTemplate: prefs.customTemplate });
+    syncSearchUI();
+  });
+
+  inp?.addEventListener("input", () => {
+    const prefs = getSearchPrefs();
+    setSearchPrefs({ engine: prefs.engine, customTemplate: inp.value });
+  });
+
+  syncSearchUI();
 }
 
 // ----- Weather -----
@@ -542,7 +622,6 @@ function openLinkModal(idx = null) {
   renderIconPicker();
   openModal();
 
-  // focus title
   requestAnimationFrame(() => {
     $("#linkTitle")?.focus?.({ preventScroll: true });
   });
@@ -591,6 +670,8 @@ function deleteLinkFromModal() {
   renderArchive();
   wireImportExport();
 
+  // NEW
+  wireSearchEngine();
 
   // weather search
   $("#cityForm")?.addEventListener("submit", async (e) => {
@@ -609,14 +690,11 @@ function deleteLinkFromModal() {
   // link modal wiring
   $("#addLinkBtn")?.addEventListener("click", () => openLinkModal(null));
 
-  // clicking backdrop closes (but modal-card stops propagation)
   $("#linkModalClose")?.addEventListener("click", closeModal);
 
-  // "Done" should not silently discard edits: if URL field has something, save; else close
   $("#linkModalDone")?.addEventListener("click", () => {
     const url = ($("#linkUrl")?.value || "").trim();
     const title = ($("#linkTitle")?.value || "").trim();
-    // If user typed anything, save; otherwise just close
     if (url || title) saveLinkFromModal();
     else closeModal();
   });
@@ -626,7 +704,6 @@ function deleteLinkFromModal() {
 
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
-    // Enter inside modal saves if focused on URL/title field
     if (e.key === "Enter") {
       const active = document.activeElement;
       if (active && (active.id === "linkTitle" || active.id === "linkUrl")) {

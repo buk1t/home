@@ -158,3 +158,194 @@
   padding: 0;
   cursor: pointer;
 }
+
+/* -------------------------
+   Preset categories UI
+   ------------------------- */
+
+.preset-group {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--stroke) 70%, transparent 30%);
+}
+
+.preset-group:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.preset-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.preset-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--text) 86%, transparent 14%);
+  text-transform: uppercase;
+}
+
+.preset-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.preset-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* nicer preset button */
+.presetbtn {
+  appearance: none;
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  transition: transform 140ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, background 150ms ease;
+}
+
+.presetbtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--stroke-strong);
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+.presetbtn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.presetbtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 55%, transparent 45%),
+    0 14px 34px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================
+   Preset groups (Example themes)
+   ========================= */
+
+#presetRow {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}
+
+/* each category block */
+.preset-group {
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+  padding: 10px;
+}
+
+/* header row: category + count pill */
+.preset-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.preset-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--text) 92%, transparent 8%);
+}
+
+.preset-count {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: color-mix(in srgb, var(--card2) 72%, transparent 28%);
+  color: var(--muted);
+}
+
+/* buttons grid */
+.preset-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .preset-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* preset button */
+.presetbtn {
+  appearance: none;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: var(--text);
+
+  transition: transform 120ms ease, border-color 140ms ease,
+    box-shadow 140ms ease, background 140ms ease;
+}
+
+.presetbtn:hover {
+  border-color: var(--stroke-strong);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card) 92%, transparent 8%),
+    color-mix(in srgb, var(--card2) 92%, transparent 8%)
+  );
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.presetbtn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.presetbtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 55%, transparent 45%),
+    0 16px 44px rgba(0, 0, 0, 0.12);
+}
+
+/* optional: make the whole Example Themes panel actions area not fight layout */
+.panel-actions#presetRow {
+  display: grid;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Selected preset ring */
+.presetbtn.is-selected {
+  border-color: var(--stroke-strong);
+  box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--stroke-strong) 45%, transparent 55%),
+    0 16px 44px rgba(0, 0, 0, 0.1);
+}

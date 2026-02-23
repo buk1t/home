@@ -9,6 +9,7 @@
 const STORE_KEY = "home.state.v1";      // checklist state
 const LINKS_KEY = "home.links.v1";      // links grid
 const WEATHER_KEY = "home.weather.v1";  // custom city (lat/lon/tz/name)
+const SEARCH_KEY = "home.search.v1";    // search engine prefs
 
 // ---------- Small utils ----------
 const $ = (sel) => document.querySelector(sel);
@@ -96,8 +97,60 @@ function normalizeUrl(text) {
   return /^https?:\/\//i.test(s) ? s : `https://${s}`;
 }
 
-function googleSearchUrl(q) {
-  return `https://www.google.com/search?q=${encodeURIComponent(q.trim())}`;
+function defaultSearchPrefs() {
+  return {
+    engine: "google", // google | ddg | brave | bing | kagi | perplexity | custom
+    customTemplate: "https://www.google.com/search?q={q}",
+  };
+}
+
+function getSearchPrefs() {
+  const prefs = loadJSON(SEARCH_KEY, null);
+  if (!prefs || typeof prefs !== "object") return defaultSearchPrefs();
+
+  const engine = String(prefs.engine || "").trim().toLowerCase();
+  const customTemplate = String(prefs.customTemplate || "").trim();
+
+  return {
+    engine: engine || defaultSearchPrefs().engine,
+    customTemplate: customTemplate || defaultSearchPrefs().customTemplate,
+  };
+}
+
+function templateForEngine(engine, customTemplate) {
+  switch (engine) {
+    case "ddg":
+      return "https://duckduckgo.com/?q={q}";
+    case "brave":
+      return "https://search.brave.com/search?q={q}";
+    case "bing":
+      return "https://www.bing.com/search?q={q}";
+    case "kagi":
+      return "https://kagi.com/search?q={q}";
+    case "perplexity":
+      return "https://www.perplexity.ai/search?q={q}";
+    case "custom":
+      return customTemplate || defaultSearchPrefs().customTemplate;
+    case "google":
+    default:
+      return "https://www.google.com/search?q={q}";
+  }
+}
+
+function buildSearchUrl(q) {
+  const prefs = getSearchPrefs();
+  const tpl = templateForEngine(prefs.engine, prefs.customTemplate);
+
+  // Must contain {q}. If not, append it safely.
+  const hasToken = tpl.includes("{q}");
+  const encoded = encodeURIComponent((q || "").trim());
+
+  if (!hasToken) {
+    const join = tpl.includes("?") ? "&" : "?";
+    return `${tpl}${join}q=${encoded}`;
+  }
+
+  return tpl.replaceAll("{q}", encoded);
 }
 
 function initSearch() {
@@ -133,7 +186,7 @@ function initSearch() {
 
     window.location.href = isLikelyUrl(text)
       ? normalizeUrl(text)
-      : googleSearchUrl(text);
+      : buildSearchUrl(text);
   });
 }
 
@@ -142,41 +195,41 @@ function defaultLinks() {
   // Used only if no links exist yet.
   return [
     {
-    id: uuid(),
-    title: "Netflix",
-    url: "https://www.netflix.com",
-    icon: "tv",
-  },
-  {
-    id: uuid(),
-    title: "Google Drive",
-    url: "https://drive.google.com",
-    icon: "folder",
-  },
-  {
-    id: uuid(),
-    title: "Instagram",
-    url: "https://www.instagram.com",
-    icon: "camera",
-  },
-  {
-    id: uuid(),
-    title: "HBO Max",
-    url: "https://www.max.com",
-    icon: "play",
-  },
-  {
-    id: uuid(),
-    title: "Outlook",
-    url: "https://outlook.live.com",
-    icon: "mail",
-  },
-  {
-    id: uuid(),
-    title: "Zillow",
-    url: "https://www.zillow.com",
-    icon: "home",
-  },
+      id: uuid(),
+      title: "Netflix",
+      url: "https://www.netflix.com",
+      icon: "tv",
+    },
+    {
+      id: uuid(),
+      title: "Google Drive",
+      url: "https://drive.google.com",
+      icon: "folder",
+    },
+    {
+      id: uuid(),
+      title: "Instagram",
+      url: "https://www.instagram.com",
+      icon: "camera",
+    },
+    {
+      id: uuid(),
+      title: "HBO Max",
+      url: "https://www.max.com",
+      icon: "play",
+    },
+    {
+      id: uuid(),
+      title: "Outlook",
+      url: "https://outlook.live.com",
+      icon: "mail",
+    },
+    {
+      id: uuid(),
+      title: "Zillow",
+      url: "https://www.zillow.com",
+      icon: "home",
+    },
   ];
 }
 
@@ -227,7 +280,7 @@ function renderLinksGrid() {
 
     // If user omitted scheme but it looks like a domain, fix it.
     if (url !== "/settings" && !/^https?:\/\//i.test(url) && url.includes(".")) {
-    url = "https://" + url;
+      url = "https://" + url;
     }
 
     const a = document.createElement("a");
@@ -501,9 +554,9 @@ async function loadWeather() {
 
   const cityPill = $("#weatherCity");
   if (cityPill) {
-  const label = (prefs.name || "Weather").split(",")[0].trim();
-  cityPill.textContent = label || "Weather";
-}
+    const label = (prefs.name || "Weather").split(",")[0].trim();
+    cityPill.textContent = label || "Weather";
+  }
 
   const url =
     "https://api.open-meteo.com/v1/forecast" +

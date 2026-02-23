@@ -5,27 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Theme</title>
 
-    <script>
-      (function () {
-        const THEME_KEY = "home.theme.v1";
-        try {
-          const raw = localStorage.getItem(THEME_KEY);
-          if (!raw) return;
+    <!-- ✅ Canonical theme applier (fixes favicon on scheme change too) -->
+    <script src="/js/favicon-live.js"></script>
+    <script src="/js/theme-apply.js"></script>
 
-          const theme = JSON.parse(raw);
-          const isDark =
-            window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-          const vars = (isDark ? theme?.dark?.vars : theme?.light?.vars) || {};
-          const root = document.documentElement;
-
-          for (const [k, v] of Object.entries(vars)) {
-            root.style.setProperty(k, String(v));
-          }
-        } catch {}
-      })();
-    </script>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/theme.css" />
 
@@ -45,14 +28,9 @@
       <header class="top">
         <div class="top-left">
           <h1 class="title">Theme</h1>
-          <p class="subtitle" id="themeSubtitle">Preview + save themes.</p>
-        </div>
-
-        <div class="top-right">
-          <div class="top-actions" style="justify-content: flex-end">
-            <a class="back-link" href="/settings">← Settings</a>
-            <a class="back-link" href="/">← Home</a>
-          </div>
+          <p class="subtitle" id="themeSubtitle">
+            Preview + save themes. Presets are grouped by category.
+          </p>
         </div>
       </header>
 
@@ -126,8 +104,11 @@
               <div class="panel-title">Example themes</div>
               <div class="pill" id="statusPill">Live</div>
             </div>
-            <div class="panel-sub">Click a preset to preview instantly.</div>
+            <div class="panel-sub">
+              Click a preset to preview instantly. Categories are grouped.
+            </div>
 
+            <!-- ✅ This will be filled by JS with grouped categories -->
             <div class="panel-actions" id="presetRow"></div>
           </div>
 
@@ -206,7 +187,7 @@
       </div>
     </main>
 
-    <div class="version" id="version"></div>
+    <script src="/js/nav.js"></script>
     <script src="/js/version.js"></script>
     <script src="/js/theme.js"></script>
   </body>

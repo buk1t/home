@@ -1,0 +1,724 @@
+{
+  "version": "1.0",
+  "presets": [
+    {
+      "id": "ocean-glass",
+      "name": "Ocean Glass",
+      "category": "Ocean & Sky",
+      "description": "Blue-green glass, soft glow, calm contrast.",
+      "light": {
+        "vars": {
+          "--favicon": "#4c91b3",
+          "--text": "rgba(20, 24, 30, 0.92)",
+          "--muted": "rgba(20, 24, 30, 0.58)",
+          "--card": "rgba(246, 250, 255, 0.84)",
+          "--card2": "rgba(232, 242, 252, 0.70)",
+          "--stroke": "rgba(20, 24, 30, 0.12)",
+          "--stroke-strong": "rgba(20, 24, 30, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#d7ebff",
+          "--bg-b": "#dff3f1",
+          "--bg-c": "#d7e7ff",
+          "--bg-glow": "rgba(255, 255, 255, 0.55)",
+          "--ov-a": "rgba(255, 255, 255, 0.14)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#3f7f9b",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(12, 16, 24, 0.78)",
+          "--card2": "rgba(12, 16, 24, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 22px 70px rgba(0, 0, 0, 0.44)",
+          "--radius": "24px",
+          "--bg-a": "#030817",
+          "--bg-b": "#071a2d",
+          "--bg-c": "#052029",
+          "--bg-glow": "rgba(90, 200, 250, 0.16)",
+          "--ov-a": "rgba(90, 200, 250, 0.07)",
+          "--ov-b": "rgba(0, 0, 0, 0.55)"
+        }
+      }
+    },
+
+    {
+      "id": "arctic-ice",
+      "name": "Arctic Ice",
+      "category": "Ocean & Sky",
+      "description": "Cool whites, frosty glass, low-saturation blues.",
+      "light": {
+        "vars": {
+          "--favicon": "#6d8fa7",
+          "--text": "rgba(18, 22, 28, 0.92)",
+          "--muted": "rgba(18, 22, 28, 0.58)",
+          "--card": "rgba(250, 252, 255, 0.86)",
+          "--card2": "rgba(232, 243, 250, 0.72)",
+          "--stroke": "rgba(18, 22, 28, 0.12)",
+          "--stroke-strong": "rgba(18, 22, 28, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.11)",
+          "--radius": "24px",
+          "--bg-a": "#e7f2ff",
+          "--bg-b": "#f0fbff",
+          "--bg-c": "#e8ecff",
+          "--bg-glow": "rgba(255, 255, 255, 0.62)",
+          "--ov-a": "rgba(255, 255, 255, 0.14)",
+          "--ov-b": "rgba(0, 0, 0, 0.06)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#56788f",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(10, 14, 22, 0.78)",
+          "--card2": "rgba(10, 14, 22, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 24px 76px rgba(0, 0, 0, 0.50)",
+          "--radius": "24px",
+          "--bg-a": "#020615",
+          "--bg-b": "#081224",
+          "--bg-c": "#071b22",
+          "--bg-glow": "rgba(140, 190, 255, 0.13)",
+          "--ov-a": "rgba(140, 190, 255, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.60)"
+        }
+      }
+    },
+
+    {
+      "id": "blue-hour",
+      "name": "Blue Hour",
+      "category": "Ocean & Sky",
+      "description": "Evening sky gradient; quiet, cinematic.",
+      "light": {
+        "vars": {
+          "--favicon": "#5d7ea3",
+          "--text": "rgba(18, 20, 26, 0.92)",
+          "--muted": "rgba(18, 20, 26, 0.58)",
+          "--card": "rgba(248, 250, 255, 0.86)",
+          "--card2": "rgba(232, 238, 250, 0.72)",
+          "--stroke": "rgba(18, 20, 26, 0.12)",
+          "--stroke-strong": "rgba(18, 20, 26, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "22px",
+          "--bg-a": "#dbe8ff",
+          "--bg-b": "#e8f0ff",
+          "--bg-c": "#dde3ff",
+          "--bg-glow": "rgba(255, 255, 255, 0.52)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#4a6a86",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(12, 14, 22, 0.78)",
+          "--card2": "rgba(12, 14, 22, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.56)",
+          "--radius": "22px",
+          "--bg-a": "#040616",
+          "--bg-b": "#0b0f24",
+          "--bg-c": "#061a22",
+          "--bg-glow": "rgba(110, 150, 255, 0.13)",
+          "--ov-a": "rgba(110, 150, 255, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "seaside-mist",
+      "name": "Seaside Mist",
+      "category": "Ocean & Sky",
+      "description": "Seafoam and fog. Very soft contrast.",
+      "light": {
+        "vars": {
+          "--favicon": "#6a9a97",
+          "--text": "rgba(16, 22, 22, 0.92)",
+          "--muted": "rgba(16, 22, 22, 0.58)",
+          "--card": "rgba(248, 252, 252, 0.86)",
+          "--card2": "rgba(230, 244, 242, 0.72)",
+          "--stroke": "rgba(16, 22, 22, 0.12)",
+          "--stroke-strong": "rgba(16, 22, 22, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.11)",
+          "--radius": "24px",
+          "--bg-a": "#dff3f0",
+          "--bg-b": "#eaf7f6",
+          "--bg-c": "#e2eef5",
+          "--bg-glow": "rgba(255, 255, 255, 0.56)",
+          "--ov-a": "rgba(255, 255, 255, 0.14)",
+          "--ov-b": "rgba(0, 0, 0, 0.06)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#4f7f7c",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(10, 16, 18, 0.78)",
+          "--card2": "rgba(10, 16, 18, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.56)",
+          "--radius": "24px",
+          "--bg-a": "#030a0b",
+          "--bg-b": "#081617",
+          "--bg-c": "#062023",
+          "--bg-glow": "rgba(120, 220, 210, 0.10)",
+          "--ov-a": "rgba(120, 220, 210, 0.05)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "beachy",
+      "name": "Beachy",
+      "category": "Soft & Light",
+      "description": "Warm sand + airy blue. Friendly and bright.",
+      "light": {
+        "vars": {
+          "--favicon": "#9a8b73",
+          "--text": "rgba(24, 24, 22, 0.92)",
+          "--muted": "rgba(24, 24, 22, 0.58)",
+          "--card": "rgba(255, 252, 245, 0.86)",
+          "--card2": "rgba(244, 238, 228, 0.72)",
+          "--stroke": "rgba(24, 24, 22, 0.12)",
+          "--stroke-strong": "rgba(24, 24, 22, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#f7efe0",
+          "--bg-b": "#e9f3ff",
+          "--bg-c": "#f1ead8",
+          "--bg-glow": "rgba(255, 255, 255, 0.55)",
+          "--ov-a": "rgba(255, 255, 255, 0.14)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#6f6a5f",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(18, 18, 22, 0.76)",
+          "--card2": "rgba(18, 18, 22, 0.54)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 24px 80px rgba(0, 0, 0, 0.50)",
+          "--radius": "24px",
+          "--bg-a": "#090a10",
+          "--bg-b": "#11131b",
+          "--bg-c": "#101a1e",
+          "--bg-glow": "rgba(255, 220, 160, 0.10)",
+          "--ov-a": "rgba(255, 220, 160, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.60)"
+        }
+      }
+    },
+
+    {
+      "id": "vanilla-cream",
+      "name": "Vanilla Cream",
+      "category": "Soft & Light",
+      "description": "Warm whites with gentle beige depth.",
+      "light": {
+        "vars": {
+          "--favicon": "#b09a7b",
+          "--text": "rgba(26, 22, 18, 0.92)",
+          "--muted": "rgba(26, 22, 18, 0.58)",
+          "--card": "rgba(255, 253, 248, 0.88)",
+          "--card2": "rgba(246, 240, 230, 0.72)",
+          "--stroke": "rgba(30, 24, 18, 0.12)",
+          "--stroke-strong": "rgba(30, 24, 18, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.11)",
+          "--radius": "24px",
+          "--bg-a": "#fbf3e6",
+          "--bg-b": "#f7f1e6",
+          "--bg-c": "#efe2cf",
+          "--bg-glow": "rgba(255, 255, 255, 0.55)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#7c6d57",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(16, 14, 12, 0.78)",
+          "--card2": "rgba(16, 14, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
+          "--radius": "24px",
+          "--bg-a": "#0b0806",
+          "--bg-b": "#14110f",
+          "--bg-c": "#141a16",
+          "--bg-glow": "rgba(255, 200, 140, 0.10)",
+          "--ov-a": "rgba(255, 200, 140, 0.05)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "lavender-haze",
+      "name": "Lavender Haze",
+      "category": "Soft & Light",
+      "description": "Lavender/ice glow, gentle and dreamy.",
+      "light": {
+        "vars": {
+          "--favicon": "#7f78a6",
+          "--text": "rgba(20, 16, 26, 0.92)",
+          "--muted": "rgba(20, 16, 26, 0.58)",
+          "--card": "rgba(252, 248, 255, 0.86)",
+          "--card2": "rgba(236, 228, 248, 0.72)",
+          "--stroke": "rgba(20, 16, 26, 0.12)",
+          "--stroke-strong": "rgba(20, 16, 26, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#efe7ff",
+          "--bg-b": "#e7f0ff",
+          "--bg-c": "#f5e7ff",
+          "--bg-glow": "rgba(255, 255, 255, 0.55)",
+          "--ov-a": "rgba(255, 255, 255, 0.14)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#5f5a86",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(16, 12, 22, 0.78)",
+          "--card2": "rgba(16, 12, 22, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
+          "--radius": "24px",
+          "--bg-a": "#070511",
+          "--bg-b": "#120a1f",
+          "--bg-c": "#0b1a24",
+          "--bg-glow": "rgba(200, 140, 255, 0.12)",
+          "--ov-a": "rgba(200, 140, 255, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "warm-latte",
+      "name": "Warm Latte",
+      "category": "Earthy",
+      "description": "Coffee warmth, cozy contrast, natural tones.",
+      "light": {
+        "vars": {
+          "--favicon": "#9b7a5c",
+          "--text": "rgba(28, 22, 18, 0.92)",
+          "--muted": "rgba(28, 22, 18, 0.58)",
+          "--card": "rgba(251, 244, 234, 0.86)",
+          "--card2": "rgba(236, 223, 206, 0.72)",
+          "--stroke": "rgba(40, 28, 20, 0.14)",
+          "--stroke-strong": "rgba(40, 28, 20, 0.25)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.13)",
+          "--radius": "22px",
+          "--bg-a": "#e9dbc9",
+          "--bg-b": "#efe6da",
+          "--bg-c": "#dfc8ae",
+          "--bg-glow": "rgba(255, 255, 255, 0.40)",
+          "--ov-a": "rgba(255, 255, 255, 0.11)",
+          "--ov-b": "rgba(0, 0, 0, 0.09)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#7a5c44",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(18, 14, 12, 0.78)",
+          "--card2": "rgba(18, 14, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 24px 88px rgba(0, 0, 0, 0.55)",
+          "--radius": "22px",
+          "--bg-a": "#0c0706",
+          "--bg-b": "#15100f",
+          "--bg-c": "#141915",
+          "--bg-glow": "rgba(255, 190, 120, 0.11)",
+          "--ov-a": "rgba(255, 190, 120, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "forest",
+      "name": "Forest",
+      "category": "Earthy",
+      "description": "Green hush, cool shadows, subtle teal glow.",
+      "light": {
+        "vars": {
+          "--favicon": "#6a8a78",
+          "--text": "rgba(18, 24, 20, 0.92)",
+          "--muted": "rgba(18, 24, 20, 0.58)",
+          "--card": "rgba(246, 250, 246, 0.84)",
+          "--card2": "rgba(226, 238, 228, 0.72)",
+          "--stroke": "rgba(18, 24, 20, 0.12)",
+          "--stroke-strong": "rgba(18, 24, 20, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "22px",
+          "--bg-a": "#d9efe0",
+          "--bg-b": "#e7f3e7",
+          "--bg-c": "#d7e7db",
+          "--bg-glow": "rgba(255, 255, 255, 0.50)",
+          "--ov-a": "rgba(255, 255, 255, 0.13)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#4e6c5c",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(10, 16, 12, 0.78)",
+          "--card2": "rgba(10, 16, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
+          "--radius": "22px",
+          "--bg-a": "#030b07",
+          "--bg-b": "#061612",
+          "--bg-c": "#06201a",
+          "--bg-glow": "rgba(0, 255, 170, 0.10)",
+          "--ov-a": "rgba(0, 255, 170, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.62)"
+        }
+      }
+    },
+
+    {
+      "id": "clay-stone",
+      "name": "Clay Stone",
+      "category": "Earthy",
+      "description": "Muted terracotta + stone neutrals.",
+      "light": {
+        "vars": {
+          "--favicon": "#9a7468",
+          "--text": "rgba(28, 20, 18, 0.92)",
+          "--muted": "rgba(28, 20, 18, 0.58)",
+          "--card": "rgba(255, 249, 246, 0.86)",
+          "--card2": "rgba(244, 234, 228, 0.72)",
+          "--stroke": "rgba(28, 20, 18, 0.12)",
+          "--stroke-strong": "rgba(28, 20, 18, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#f2dfd7",
+          "--bg-b": "#f5ede7",
+          "--bg-c": "#e6d0c7",
+          "--bg-glow": "rgba(255, 255, 255, 0.48)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.08)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#755850",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(18, 12, 12, 0.78)",
+          "--card2": "rgba(18, 12, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
+          "--radius": "24px",
+          "--bg-a": "#0b0606",
+          "--bg-b": "#140c0c",
+          "--bg-c": "#141a16",
+          "--bg-glow": "rgba(255, 170, 150, 0.10)",
+          "--ov-a": "rgba(255, 170, 150, 0.05)",
+          "--ov-b": "rgba(0, 0, 0, 0.64)"
+        }
+      }
+    },
+
+    {
+      "id": "nord-slate",
+      "name": "Nord Slate",
+      "category": "Mono",
+      "description": "Clean slate. Crisp, modern, not harsh.",
+      "light": {
+        "vars": {
+          "--favicon": "#6e7b8a",
+          "--text": "rgba(18, 22, 30, 0.92)",
+          "--muted": "rgba(18, 22, 30, 0.58)",
+          "--card": "rgba(246, 248, 252, 0.86)",
+          "--card2": "rgba(230, 236, 246, 0.72)",
+          "--stroke": "rgba(18, 22, 30, 0.12)",
+          "--stroke-strong": "rgba(18, 22, 30, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "22px",
+          "--bg-a": "#dbe4f0",
+          "--bg-b": "#e3edf7",
+          "--bg-c": "#d7dee9",
+          "--bg-glow": "rgba(255, 255, 255, 0.48)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#55626f",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(14, 18, 26, 0.78)",
+          "--card2": "rgba(14, 18, 26, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 24px 84px rgba(0, 0, 0, 0.52)",
+          "--radius": "22px",
+          "--bg-a": "#050812",
+          "--bg-b": "#0b1223",
+          "--bg-c": "#0b1b22",
+          "--bg-glow": "rgba(130, 170, 255, 0.12)",
+          "--ov-a": "rgba(130, 170, 255, 0.06)",
+          "--ov-b": "rgba(0, 0, 0, 0.60)"
+        }
+      }
+    },
+
+    {
+      "id": "graphite",
+      "name": "Graphite",
+      "category": "Mono",
+      "description": "Neutral graphite with quiet glow. Super readable.",
+      "light": {
+        "vars": {
+          "--favicon": "#73777f",
+          "--text": "rgba(18, 18, 18, 0.92)",
+          "--muted": "rgba(18, 18, 18, 0.58)",
+          "--card": "rgba(250, 250, 252, 0.86)",
+          "--card2": "rgba(234, 236, 240, 0.72)",
+          "--stroke": "rgba(18, 18, 18, 0.12)",
+          "--stroke-strong": "rgba(18, 18, 18, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.11)",
+          "--radius": "22px",
+          "--bg-a": "#e7e9ee",
+          "--bg-b": "#eef0f3",
+          "--bg-c": "#dfe3ea",
+          "--bg-glow": "rgba(255, 255, 255, 0.52)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#5b5f66",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(14, 14, 16, 0.78)",
+          "--card2": "rgba(14, 14, 16, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
+          "--radius": "22px",
+          "--bg-a": "#06070a",
+          "--bg-b": "#0e1016",
+          "--bg-c": "#0b1a22",
+          "--bg-glow": "rgba(200, 220, 255, 0.08)",
+          "--ov-a": "rgba(200, 220, 255, 0.04)",
+          "--ov-b": "rgba(0, 0, 0, 0.64)"
+        }
+      }
+    },
+
+    {
+      "id": "paper-ink",
+      "name": "Paper & Ink",
+      "category": "Mono",
+      "description": "Minimal, almost editorial. Very calm.",
+      "light": {
+        "vars": {
+          "--favicon": "#7a7a74",
+          "--text": "rgba(20, 20, 18, 0.92)",
+          "--muted": "rgba(20, 20, 18, 0.56)",
+          "--card": "rgba(255, 255, 252, 0.88)",
+          "--card2": "rgba(242, 242, 236, 0.72)",
+          "--stroke": "rgba(20, 20, 18, 0.12)",
+          "--stroke-strong": "rgba(20, 20, 18, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.10)",
+          "--radius": "22px",
+          "--bg-a": "#f4f3ef",
+          "--bg-b": "#f9f9f6",
+          "--bg-c": "#eceae4",
+          "--bg-glow": "rgba(255, 255, 255, 0.50)",
+          "--ov-a": "rgba(255, 255, 255, 0.10)",
+          "--ov-b": "rgba(0, 0, 0, 0.06)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#5f5f5a",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(12, 12, 12, 0.78)",
+          "--card2": "rgba(12, 12, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
+          "--radius": "22px",
+          "--bg-a": "#050505",
+          "--bg-b": "#0b0b0b",
+          "--bg-c": "#07121a",
+          "--bg-glow": "rgba(255, 255, 255, 0.06)",
+          "--ov-a": "rgba(255, 255, 255, 0.03)",
+          "--ov-b": "rgba(0, 0, 0, 0.66)"
+        }
+      }
+    },
+
+    {
+      "id": "midnight-teal",
+      "name": "Midnight Teal",
+      "category": "Night",
+      "description": "Deep ocean night. Teal glow, subtle.",
+      "light": {
+        "vars": {
+          "--favicon": "#5a7a7a",
+          "--text": "rgba(18, 22, 24, 0.92)",
+          "--muted": "rgba(18, 22, 24, 0.58)",
+          "--card": "rgba(246, 250, 250, 0.84)",
+          "--card2": "rgba(230, 242, 242, 0.70)",
+          "--stroke": "rgba(18, 22, 24, 0.12)",
+          "--stroke-strong": "rgba(18, 22, 24, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#dff1f1",
+          "--bg-b": "#e7f5f5",
+          "--bg-c": "#d8e9ee",
+          "--bg-glow": "rgba(255, 255, 255, 0.50)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#3f6a6a",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(8, 14, 16, 0.78)",
+          "--card2": "rgba(8, 14, 16, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
+          "--radius": "24px",
+          "--bg-a": "#020708",
+          "--bg-b": "#061617",
+          "--bg-c": "#062024",
+          "--bg-glow": "rgba(120, 240, 220, 0.09)",
+          "--ov-a": "rgba(120, 240, 220, 0.05)",
+          "--ov-b": "rgba(0, 0, 0, 0.64)"
+        }
+      }
+    },
+
+    {
+      "id": "deep-indigo",
+      "name": "Deep Indigo",
+      "category": "Night",
+      "description": "Indigo night gradient; slightly purple, still muted.",
+      "light": {
+        "vars": {
+          "--favicon": "#6c6f95",
+          "--text": "rgba(18, 18, 26, 0.92)",
+          "--muted": "rgba(18, 18, 26, 0.58)",
+          "--card": "rgba(248, 248, 255, 0.86)",
+          "--card2": "rgba(232, 234, 248, 0.72)",
+          "--stroke": "rgba(18, 18, 26, 0.12)",
+          "--stroke-strong": "rgba(18, 18, 26, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "22px",
+          "--bg-a": "#e6e9ff",
+          "--bg-b": "#eef0ff",
+          "--bg-c": "#e2e4ff",
+          "--bg-glow": "rgba(255, 255, 255, 0.52)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.07)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#4f5278",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(10, 10, 20, 0.78)",
+          "--card2": "rgba(10, 10, 20, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
+          "--radius": "22px",
+          "--bg-a": "#040416",
+          "--bg-b": "#0c0a22",
+          "--bg-c": "#071a24",
+          "--bg-glow": "rgba(160, 150, 255, 0.10)",
+          "--ov-a": "rgba(160, 150, 255, 0.05)",
+          "--ov-b": "rgba(0, 0, 0, 0.66)"
+        }
+      }
+    },
+
+    {
+      "id": "smoke-rose",
+      "name": "Smoke Rose",
+      "category": "Night",
+      "description": "Muted rose on dark charcoal. Very subtle.",
+      "light": {
+        "vars": {
+          "--favicon": "#8c6b73",
+          "--text": "rgba(26, 18, 20, 0.92)",
+          "--muted": "rgba(26, 18, 20, 0.58)",
+          "--card": "rgba(255, 248, 250, 0.86)",
+          "--card2": "rgba(244, 232, 238, 0.72)",
+          "--stroke": "rgba(26, 18, 20, 0.12)",
+          "--stroke-strong": "rgba(26, 18, 20, 0.22)",
+          "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
+          "--radius": "24px",
+          "--bg-a": "#f2dfe4",
+          "--bg-b": "#f6edf0",
+          "--bg-c": "#e6d7e4",
+          "--bg-glow": "rgba(255, 255, 255, 0.50)",
+          "--ov-a": "rgba(255, 255, 255, 0.12)",
+          "--ov-b": "rgba(0, 0, 0, 0.08)"
+        }
+      },
+      "dark": {
+        "vars": {
+          "--favicon": "#6b4f57",
+          "--text": "rgba(245, 246, 250, 0.92)",
+          "--muted": "rgba(245, 246, 250, 0.62)",
+          "--card": "rgba(16, 10, 12, 0.78)",
+          "--card2": "rgba(16, 10, 12, 0.56)",
+          "--stroke": "rgba(255, 255, 255, 0.12)",
+          "--stroke-strong": "rgba(255, 255, 255, 0.22)",
+          "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
+          "--radius": "24px",
+          "--bg-a": "#070507",
+          "--bg-b": "#130a0e",
+          "--bg-c": "#071a24",
+          "--bg-glow": "rgba(255, 140, 170, 0.08)",
+          "--ov-a": "rgba(255, 140, 170, 0.04)",
+          "--ov-b": "rgba(0, 0, 0, 0.66)"
+        }
+      }
+    }
+  ]
+}

@@ -25,6 +25,8 @@
         } catch {}
       })();
     </script>
+
+    <script src="/js/theme-apply.js"></script>
     <link rel="stylesheet" href="/css/style.css" />
 
     <script
@@ -43,16 +45,7 @@
       <header class="top">
         <div class="top-left">
           <h1 class="title">Settings</h1>
-          <p class="subtitle">Customize links, weather, and time.</p>
-        </div>
-
-        <div class="top-right">
-          <div class="top-actions" style="justify-content: flex-end">
-            <a class="back-link" href="/">← Home</a>
-            <a class="back-link" href="/theme" style="text-decoration: none"
-              >Open theme editor</a
-            >
-          </div>
+          <p class="subtitle">Customize links, weather, time, and search.</p>
         </div>
       </header>
 
@@ -82,6 +75,40 @@
             <div id="cityResults" style="margin-top: 12px"></div>
           </div>
 
+          <!-- Search engine -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Search engine</div>
+              <div class="pill" id="currentSearchPill">Google</div>
+            </div>
+            <div class="panel-sub">Controls what Home search uses.</div>
+
+            <div style="margin-top: 12px; display: grid; gap: 10px">
+              <div class="select-wrap">
+                <select class="select" id="searchEngine">
+                  <option value="google">Google</option>
+                  <option value="ddg">DuckDuckGo</option>
+                  <option value="brave">Brave Search</option>
+                  <option value="bing">Bing</option>
+                  <option value="kagi">Kagi</option>
+                  <option value="perplexity">Perplexity</option>
+                  <option value="custom">Custom…</option>
+                </select>
+              </div>
+
+              <div id="customSearchWrap" style="display: none">
+                <div class="panel-sub" style="margin-top: 0">
+                  Custom template (must include <code>{q}</code>)
+                </div>
+                <input
+                  class="search-input"
+                  id="searchCustom"
+                  type="text"
+                  placeholder="https://example.com/search?q={q}"
+                />
+              </div>
+            </div>
+          </div>
           <div class="panel" style="margin-top: 14px">
             <div class="panel-head">
               <div class="panel-title">Links grid</div>
@@ -99,18 +126,17 @@
               <div class="panel-title">Import / Export</div>
             </div>
             <div class="panel-sub">
-              Backup or move your Home setup (links, weather, checklist) to
-              another browser.
+              Move your setup between browsers/devices.
             </div>
 
-            <div class="panel-actions">
+            <div style="display: flex; gap: 10px; margin-top: 12px">
               <button class="ghostbtn" id="exportBtn" type="button">
-                Export settings
+                Export
               </button>
 
-              <button class="ghostbtn" id="importBtn" type="button">
-                Import settings
-              </button>
+              <label class="ghostbtn" for="importFile" style="cursor: pointer">
+                Import
+              </label>
               <input
                 id="importFile"
                 type="file"
@@ -120,86 +146,10 @@
             </div>
 
             <div
-              class="panel-sub"
               id="importExportMsg"
+              class="panel-sub"
               style="margin-top: 10px"
             ></div>
-          </div>
-
-          <div class="modal" id="linkModal" aria-hidden="true">
-            <div class="modal-backdrop" id="linkModalClose"></div>
-
-            <div
-              class="modal-card"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Edit link"
-            >
-              <div class="modal-head">
-                <div class="modal-title" id="linkModalTitle">Add link</div>
-                <button class="archive-btn" id="linkModalDone" type="button">
-                  Done
-                </button>
-              </div>
-
-              <div style="margin-top: 12px; display: grid; gap: 10px">
-                <label
-                  style="font-size: 12px; color: var(--muted); font-weight: 600"
-                  >Title</label
-                >
-                <input
-                  id="linkTitle"
-                  class="search-input"
-                  style="padding: 14px 16px; font-size: 16px"
-                  placeholder="e.g., YouTube"
-                />
-
-                <label
-                  style="font-size: 12px; color: var(--muted); font-weight: 600"
-                  >URL</label
-                >
-                <input
-                  id="linkUrl"
-                  class="search-input"
-                  style="padding: 14px 16px; font-size: 16px"
-                  placeholder="e.g., https://youtube.com"
-                />
-
-                <label
-                  style="font-size: 12px; color: var(--muted); font-weight: 600"
-                  >Icon</label
-                >
-                <div
-                  id="iconPicker"
-                  style="
-                    display: grid;
-                    grid-template-columns: repeat(6, minmax(0, 1fr));
-                    gap: 10px;
-                  "
-                ></div>
-
-                <div
-                  style="
-                    display: flex;
-                    gap: 10px;
-                    justify-content: flex-end;
-                    margin-top: 8px;
-                  "
-                >
-                  <button
-                    class="ghostbtn"
-                    id="deleteLinkBtn"
-                    type="button"
-                    style="display: none"
-                  >
-                    Delete
-                  </button>
-                  <button class="ghostbtn" id="saveLinkBtn" type="button">
-                    Save
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -208,18 +158,43 @@
             <div class="panel-head">
               <div class="panel-title">Archive</div>
             </div>
-            <div class="panel-sub">Completed tasks from Home.</div>
+            <div class="panel-sub">Quickly clear completed tasks.</div>
 
-            <div
-              class="archive-list"
-              id="archiveList"
-              style="margin-top: 12px"
-            ></div>
+            <div style="margin-top: 12px">
+              <button class="ghostbtn" id="archiveBtn" type="button">
+                Open archive
+              </button>
+            </div>
+
+            <div class="panel-sub" style="margin-top: 12px; opacity: 0.7">
+              (Archive UI lives on the Home page.)
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top: 14px">
+            <div class="panel-head">
+              <div class="panel-title">About</div>
+            </div>
+            <div class="panel-sub">Version + changelog.</div>
+
+            <div style="margin-top: 12px; display: flex; gap: 10px">
+              <a
+                class="ghostbtn"
+                href="/changelog"
+                style="text-decoration: none"
+                >Changelog</a
+              >
+            </div>
+
+            <div class="panel-sub" style="margin-top: 12px; opacity: 0.75">
+              <span id="versionInline"></span>
+            </div>
           </div>
         </aside>
       </div>
     </main>
-    <div class="version" id="version"></div>
+
+    <script src="/js/nav.js"></script>
     <script src="/js/version.js"></script>
     <script src="/js/icons.js"></script>
     <script src="/js/settings.js"></script>

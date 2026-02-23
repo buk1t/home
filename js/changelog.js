@@ -2,31 +2,37 @@
 
 const ENTRIES = [
   {
-    version: "v5.0.0",
+    version: "v6.0",
+    title: "Added changelog",
+    date: "02/23/26", // optional
+    bullets: ["Debugged errors on theme page as well as adding more presets", "Fixed navigation between pages", "Allow used to choose search engine"],
+  },
+  {
+    version: "v5.0",
     title: "Added changelog",
     date: "02/01/26", // optional
     bullets: ["Added a changelog page so users can understand updates.", "Fixed styling aspects.", "Restructured internals."],
   },
   {
-    version: "v4.0.0",
+    version: "v4.0",
     title: "Themes editor",
     date: "01/23/26",
     bullets: ["Created themes page and allowed the user to make custom themes.", "Added 404 page."],
   },
   {
-    version: "v3.0.0",
+    version: "v3.0",
     title: "Settings + customization",
     date: "01/18/26",
     bullets: ["Created settings page.", "Allowed the user to customize links and cities."],
   },
   {
-    version: "v2.0.0",
+    version: "v2.0",
     title: "Dark + light mode",
     date: "01/12/26",
     bullets: ["Added dark and light mode.", "Added custom fonts."],
   },
   {
-    version: "v1.0.0",
+    version: "v1.0",
     title: "First non-beta online version",
     date: "12/23/25",
     bullets: ["First non-beta online version."],

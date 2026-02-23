@@ -1,318 +1,136 @@
-// theme.js — theme editor with paired Light/Dark themes + scheme preview
+// theme.js — theme editor with paired Light/Dark themes + scheme preview + categorized presets
+// Presets loaded from /json/themes.json
+// Presets PREVIEW on click (no save). Save commits the current draft to localStorage.
+// Fixes dark-mode desync + fixes "can't apply" by using a draft layer that overrides saved values.
+// Hides "Classic"/no-op presets (empty vars).
+// Adds: last-clicked preset subtle ring (UI only, does NOT affect saving).
 
 const THEME_KEY = "home.theme.v1";
+const PRESETS_URL = "/json/themes.json";
+
 const $ = (s) => document.querySelector(s);
 const root = document.documentElement;
 
+// -------------------------
+// Editable fields
+// -------------------------
 const FIELD_GROUPS = [
   {
     title: "Core",
     hint: "Most of the vibe lives here.",
     fields: [
-      { var: "--text", label: "Text", help: "Main text color (rgba ok).", pick: true },
-      { var: "--muted", label: "Muted", help: "Secondary text.", pick: true },
-      { var: "--card", label: "Card", help: "Surface top tint (rgba best).", pick: true },
-      { var: "--card2", label: "Card 2", help: "Surface bottom tint.", pick: true },
-      { var: "--stroke", label: "Stroke", help: "Borders.", pick: true },
-      { var: "--stroke-strong", label: "Stroke strong", help: "Hover/focus borders.", pick: true },
-      { var: "--radius", label: "Radius", help: "e.g. 22px", pick: false },
-    ],
+      { var: "--text", label: "Text", pick: true },
+      { var: "--muted", label: "Muted", pick: true },
+      { var: "--card", label: "Card", pick: true },
+      { var: "--card2", label: "Card 2", pick: true },
+      { var: "--stroke", label: "Stroke", pick: true },
+      { var: "--stroke-strong", label: "Stroke strong", pick: true },
+      { var: "--radius", label: "Radius", pick: false }
+    ]
   },
   {
     title: "Background",
-    hint: "Gradient + overlay glow. This is the ‘atmosphere’.",
+    hint: "Gradient + overlay glow. This is the atmosphere.",
     fields: [
-      { var: "--bg-a", label: "BG A", help: "Gradient start.", pick: true },
-      { var: "--bg-b", label: "BG B", help: "Gradient middle.", pick: true },
-      { var: "--bg-c", label: "BG C", help: "Gradient end.", pick: true },
-      { var: "--bg-glow", label: "BG glow", help: "Radial highlight (rgba).", pick: true },
-      { var: "--ov-a", label: "Overlay glow", help: "Overlay highlight (rgba).", pick: true },
-      { var: "--ov-b", label: "Overlay shade", help: "Overlay shade (rgba).", pick: true },
-    ],
+      { var: "--bg-a", label: "BG A", pick: true },
+      { var: "--bg-b", label: "BG B", pick: true },
+      { var: "--bg-c", label: "BG C", pick: true },
+      { var: "--bg-glow", label: "BG glow", pick: true },
+      { var: "--ov-a", label: "Overlay glow", pick: true },
+      { var: "--ov-b", label: "Overlay shade", pick: true }
+    ]
+  },
+  {
+    title: "Brand",
+    hint: "Little details that change the feel.",
+    fields: [{ var: "--favicon", label: "Favicon", pick: true }]
   },
   {
     title: "Advanced",
     hint: "Tweak if you’re being insane (compliment).",
     fields: [
-      { var: "--shadow", label: "Shadow", help: "CSS shadow string.", pick: false },
-      { var: "--icon-size", label: "Icon size", help: "e.g. 20px", pick: false },
-      { var: "--icon-stroke", label: "Icon stroke", help: "e.g. 1.45", pick: false },
-    ],
-  },
+      { var: "--shadow", label: "Shadow", pick: false },
+      { var: "--icon-size", label: "Icon size", pick: false },
+      { var: "--icon-stroke", label: "Icon stroke", pick: false }
+    ]
+  }
 ];
 
-// ----- Presets (paired Light + Dark) -----
-const PRESETS = [
-  // 1
-  {
-    name: "Ocean Glass",
-    light: {
-      "--text": "rgba(20, 24, 30, 0.92)",
-      "--muted": "rgba(20, 24, 30, 0.58)",
-      "--card": "rgba(246, 250, 255, 0.84)",
-      "--card2": "rgba(232, 242, 252, 0.70)",
-      "--stroke": "rgba(20, 24, 30, 0.12)",
-      "--stroke-strong": "rgba(20, 24, 30, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "24px",
-      "--bg-a": "#d7ebff",
-      "--bg-b": "#dff3f1",
-      "--bg-c": "#d7e7ff",
-      "--bg-glow": "rgba(255, 255, 255, 0.55)",
-      "--ov-a": "rgba(255, 255, 255, 0.14)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(12, 16, 24, 0.78)",
-      "--card2": "rgba(12, 16, 24, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 22px 70px rgba(0, 0, 0, 0.44)",
-      "--radius": "24px",
-      "--bg-a": "#030817",
-      "--bg-b": "#071a2d",
-      "--bg-c": "#052029",
-      "--bg-glow": "rgba(90, 200, 250, 0.16)",
-      "--ov-a": "rgba(90, 200, 250, 0.07)",
-      "--ov-b": "rgba(0, 0, 0, 0.55)",
-    },
+const MANAGED_VARS = Array.from(
+  new Set(FIELD_GROUPS.flatMap((g) => g.fields.map((f) => f.var)))
+);
+
+// -------------------------
+// State
+// -------------------------
+const state = {
+  schemePreview: "auto", // "auto" | "light" | "dark"
+  editingScheme: "light", // "light" | "dark"
+  // Draft layer: what the user is previewing/editing right now (not yet saved)
+  draft: {
+    light: {},
+    dark: {}
   },
 
-  // 2
-  {
-    name: "Beachy",
-    light: {
-      "--text": "rgba(24, 24, 22, 0.92)",
-      "--muted": "rgba(24, 24, 22, 0.58)",
-      "--card": "rgba(255, 252, 245, 0.86)",
-      "--card2": "rgba(244, 238, 228, 0.72)",
-      "--stroke": "rgba(24, 24, 22, 0.12)",
-      "--stroke-strong": "rgba(24, 24, 22, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "24px",
-      "--bg-a": "#f7efe0",
-      "--bg-b": "#e9f3ff",
-      "--bg-c": "#f1ead8",
-      "--bg-glow": "rgba(255, 255, 255, 0.55)",
-      "--ov-a": "rgba(255, 255, 255, 0.14)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(18, 18, 22, 0.76)",
-      "--card2": "rgba(18, 18, 22, 0.54)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 24px 80px rgba(0, 0, 0, 0.50)",
-      "--radius": "24px",
-      "--bg-a": "#090a10",
-      "--bg-b": "#11131b",
-      "--bg-c": "#101a1e",
-      "--bg-glow": "rgba(255, 220, 160, 0.10)",
-      "--ov-a": "rgba(255, 220, 160, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.60)",
-    },
-  },
+  // UI-only: last clicked preset ring
+  lastPresetId: null
+};
 
-  // 3
-  {
-    name: "Warm Latte",
-    light: {
-      "--text": "rgba(28, 22, 18, 0.92)",
-      "--muted": "rgba(28, 22, 18, 0.58)",
-      "--card": "rgba(251, 244, 234, 0.86)",
-      "--card2": "rgba(236, 223, 206, 0.72)",
-      "--stroke": "rgba(40, 28, 20, 0.14)",
-      "--stroke-strong": "rgba(40, 28, 20, 0.25)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.13)",
-      "--radius": "22px",
-      "--bg-a": "#e9dbc9",
-      "--bg-b": "#efe6da",
-      "--bg-c": "#dfc8ae",
-      "--bg-glow": "rgba(255, 255, 255, 0.40)",
-      "--ov-a": "rgba(255, 255, 255, 0.11)",
-      "--ov-b": "rgba(0, 0, 0, 0.09)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(18, 14, 12, 0.78)",
-      "--card2": "rgba(18, 14, 12, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 24px 88px rgba(0, 0, 0, 0.55)",
-      "--radius": "22px",
-      "--bg-a": "#0c0706",
-      "--bg-b": "#15100f",
-      "--bg-c": "#141915",
-      "--bg-glow": "rgba(255, 190, 120, 0.11)",
-      "--ov-a": "rgba(255, 190, 120, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.62)",
-    },
-  },
+// -------------------------
+// Presets from JSON
+// -------------------------
+let PRESETS = [];
 
-  // 4
-  {
-    name: "Nord Slate",
-    light: {
-      "--text": "rgba(18, 22, 30, 0.92)",
-      "--muted": "rgba(18, 22, 30, 0.58)",
-      "--card": "rgba(246, 248, 252, 0.86)",
-      "--card2": "rgba(230, 236, 246, 0.72)",
-      "--stroke": "rgba(18, 22, 30, 0.12)",
-      "--stroke-strong": "rgba(18, 22, 30, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "22px",
-      "--bg-a": "#dbe4f0",
-      "--bg-b": "#e3edf7",
-      "--bg-c": "#d7dee9",
-      "--bg-glow": "rgba(255, 255, 255, 0.48)",
-      "--ov-a": "rgba(255, 255, 255, 0.12)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(14, 18, 26, 0.78)",
-      "--card2": "rgba(14, 18, 26, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 24px 84px rgba(0, 0, 0, 0.52)",
-      "--radius": "22px",
-      "--bg-a": "#050812",
-      "--bg-b": "#0b1223",
-      "--bg-c": "#0b1b22",
-      "--bg-glow": "rgba(130, 170, 255, 0.12)",
-      "--ov-a": "rgba(130, 170, 255, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.60)",
-    },
-  },
+async function loadPresets() {
+  const res = await fetch(PRESETS_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Failed to load presets: ${PRESETS_URL}`);
+  const json = await res.json();
 
-  // 5
-  {
-    name: "Lavender Haze",
-    light: {
-      "--text": "rgba(20, 16, 26, 0.92)",
-      "--muted": "rgba(20, 16, 26, 0.58)",
-      "--card": "rgba(252, 248, 255, 0.86)",
-      "--card2": "rgba(236, 228, 248, 0.72)",
-      "--stroke": "rgba(20, 16, 26, 0.12)",
-      "--stroke-strong": "rgba(20, 16, 26, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "24px",
-      "--bg-a": "#efe7ff",
-      "--bg-b": "#e7f0ff",
-      "--bg-c": "#f5e7ff",
-      "--bg-glow": "rgba(255, 255, 255, 0.55)",
-      "--ov-a": "rgba(255, 255, 255, 0.14)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(16, 12, 22, 0.78)",
-      "--card2": "rgba(16, 12, 22, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
-      "--radius": "24px",
-      "--bg-a": "#070511",
-      "--bg-b": "#120a1f",
-      "--bg-c": "#0b1a24",
-      "--bg-glow": "rgba(200, 140, 255, 0.12)",
-      "--ov-a": "rgba(200, 140, 255, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.62)",
-    },
-  },
+  const list = Array.isArray(json.presets)
+    ? json.presets
+    : Array.isArray(json)
+      ? json
+      : [];
 
-  // 6
-  {
-    name: "Forest",
-    light: {
-      "--text": "rgba(18, 24, 20, 0.92)",
-      "--muted": "rgba(18, 24, 20, 0.58)",
-      "--card": "rgba(246, 250, 246, 0.84)",
-      "--card2": "rgba(226, 238, 228, 0.72)",
-      "--stroke": "rgba(18, 24, 20, 0.12)",
-      "--stroke-strong": "rgba(18, 24, 20, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "22px",
-      "--bg-a": "#d9efe0",
-      "--bg-b": "#e7f3e7",
-      "--bg-c": "#d7e7db",
-      "--bg-glow": "rgba(255, 255, 255, 0.50)",
-      "--ov-a": "rgba(255, 255, 255, 0.13)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(10, 16, 12, 0.78)",
-      "--card2": "rgba(10, 16, 12, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 26px 92px rgba(0, 0, 0, 0.58)",
-      "--radius": "22px",
-      "--bg-a": "#030b07",
-      "--bg-b": "#061612",
-      "--bg-c": "#06201a",
-      "--bg-glow": "rgba(0, 255, 170, 0.10)",
-      "--ov-a": "rgba(0, 255, 170, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.62)",
-    },
-  },
+  const normalizeVars = (maybe) => {
+    if (!maybe) return {};
+    if (maybe.vars && typeof maybe.vars === "object") return maybe.vars;
+    if (typeof maybe === "object") return maybe;
+    return {};
+  };
 
-  // 7
-  {
-    name: "Cherry Soda",
-    light: {
-      "--text": "rgba(26, 16, 18, 0.92)",
-      "--muted": "rgba(26, 16, 18, 0.58)",
-      "--card": "rgba(255, 248, 250, 0.86)",
-      "--card2": "rgba(248, 232, 238, 0.72)",
-      "--stroke": "rgba(26, 16, 18, 0.12)",
-      "--stroke-strong": "rgba(26, 16, 18, 0.22)",
-      "--shadow": "0 18px 46px rgba(0, 0, 0, 0.12)",
-      "--radius": "24px",
-      "--bg-a": "#ffe1ea",
-      "--bg-b": "#fff0f4",
-      "--bg-c": "#f7e0ff",
-      "--bg-glow": "rgba(255, 255, 255, 0.55)",
-      "--ov-a": "rgba(255, 255, 255, 0.14)",
-      "--ov-b": "rgba(0, 0, 0, 0.07)",
-    },
-    dark: {
-      "--text": "rgba(245, 246, 250, 0.92)",
-      "--muted": "rgba(245, 246, 250, 0.62)",
-      "--card": "rgba(20, 10, 14, 0.78)",
-      "--card2": "rgba(20, 10, 14, 0.56)",
-      "--stroke": "rgba(255, 255, 255, 0.12)",
-      "--stroke-strong": "rgba(255, 255, 255, 0.22)",
-      "--shadow": "0 26px 92px rgba(0, 0, 0, 0.60)",
-      "--radius": "24px",
-      "--bg-a": "#0b0507",
-      "--bg-b": "#1a0a10",
-      "--bg-c": "#101a22",
-      "--bg-glow": "rgba(255, 90, 140, 0.10)",
-      "--ov-a": "rgba(255, 90, 140, 0.06)",
-      "--ov-b": "rgba(0, 0, 0, 0.64)",
-    },
-  },
+  const hasAnyVars = (o) =>
+    o && typeof o === "object" && Object.keys(o).length > 0;
 
-  // 8
-  {
-    name: "Classic (Your Current)",
-    light: {}, // empty means “use current defaults”
-    dark: {},  // empty means “use current defaults”
-  },
-];
+  PRESETS = list
+    .filter(Boolean)
+    .map((p) => ({
+      id: p.id || p.name || crypto?.randomUUID?.() || String(Math.random()),
+      name: p.name || "Untitled",
+      category: (p.category || "Other").trim(),
+      description: p.description || "",
+      light: { vars: normalizeVars(p.light) },
+      dark: { vars: normalizeVars(p.dark) }
+    }))
+    // Hide no-op presets
+    .filter((p) => hasAnyVars(p.light.vars) || hasAnyVars(p.dark.vars))
+    .filter((p) => !/^classic\b/i.test(p.name || ""));
+}
 
-// ----- helpers -----
+// -------------------------
+// Helpers
+// -------------------------
 function isSystemDark() {
-  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+}
+
+function currentScheme() {
+  if (state.schemePreview === "light" || state.schemePreview === "dark")
+    return state.schemePreview;
+  return isSystemDark() ? "dark" : "light";
 }
 
 function getSaved() {
@@ -333,29 +151,37 @@ function updateStatus(text) {
   if (pill) pill.textContent = text;
 }
 
-function getEditingValue(varName) {
-  const saved = getSaved();
-  const bucket = state.editingScheme === "dark" ? saved?.dark?.vars : saved?.light?.vars;
-  const fromSaved = bucket?.[varName];
-  return (fromSaved && String(fromSaved).trim() !== "") ? String(fromSaved).trim() : safeGetVar(varName);
+function safeGetVar(varName) {
+  try {
+    return (
+      getComputedStyle(document.documentElement).getPropertyValue(varName) || ""
+    ).trim();
+  } catch {
+    return "";
+  }
 }
 
 function applyVars(vars) {
   for (const [k, v] of Object.entries(vars || {})) {
-    if (String(v).trim() !== "") root.style.setProperty(k, String(v));
+    const s = String(v ?? "").trim();
+    if (s) root.style.setProperty(k, s);
   }
 }
 
 function clearManagedVars() {
-  FIELD_GROUPS.flatMap(g => g.fields).forEach(f => root.style.removeProperty(f.var));
+  for (const v of MANAGED_VARS) root.style.removeProperty(v);
 }
 
 function toHexish(color) {
   const c = String(color || "").trim();
   if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(c)) {
-    return c.length === 4 ? "#" + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c;
+    return c.length === 4
+      ? "#" + c[1] + c[1] + c[2] + c[2] + c[3] + c[3]
+      : c;
   }
-  const m = c.match(/rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)/i);
+  const m = c.match(
+    /rgba?\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)/i
+  );
   if (m) {
     const r = Math.max(0, Math.min(255, Math.round(Number(m[1]))));
     const g = Math.max(0, Math.min(255, Math.round(Number(m[2]))));
@@ -366,79 +192,147 @@ function toHexish(color) {
   return "#777777";
 }
 
-// ----- scheme state -----
-// schemePreview: "auto" | "light" | "dark"
-// editingScheme: "light" | "dark"
-const state = {
-  schemePreview: "auto",
-  editingScheme: isSystemDark() ? "dark" : "light",
-};
+// -------------------------
+// Preset selection ring (UI only)
+// -------------------------
+function esc(sel) {
+  // CSS.escape fallback (super defensive)
+  if (window.CSS && typeof window.CSS.escape === "function") return window.CSS.escape(sel);
+  return String(sel).replace(/["\\#.;,[\]:()=]/g, "\\$&");
+}
 
+function markSelectedPreset(id) {
+  state.lastPresetId = id || null;
+
+  document.querySelectorAll(".presetbtn.is-selected").forEach((b) => {
+    b.classList.remove("is-selected");
+  });
+
+  if (!id) return;
+
+  const btn = document.querySelector(`.presetbtn[data-preset-id="${esc(id)}"]`);
+  if (btn) btn.classList.add("is-selected");
+
+  // Optional: persist selection while you stay in the tab/session
+  try {
+    sessionStorage.setItem("theme.lastPresetId", String(id));
+  } catch {}
+}
+
+// -------------------------
+// Favicon live preview (requires /js/favicon-live.js)
+// -------------------------
+function previewFavicon(color) {
+  const c = String(color || "").trim();
+  if (!c) return;
+  window.BUK1T_FAVICON?.set?.(c);
+}
+
+function clearFaviconPreview() {
+  window.BUK1T_FAVICON?.clear?.();
+}
+
+function getActiveFaviconColorFromDraftOrSavedOrCSS(scheme) {
+  const sch = scheme === "light" || scheme === "dark" ? scheme : currentScheme();
+
+  const draftVal = state.draft?.[sch]?.["--favicon"];
+  if (draftVal && String(draftVal).trim()) return String(draftVal).trim();
+
+  const saved = getSaved();
+  const fromSaved =
+    sch === "dark"
+      ? saved?.dark?.vars?.["--favicon"]
+      : saved?.light?.vars?.["--favicon"];
+  if (fromSaved && String(fromSaved).trim()) return String(fromSaved).trim();
+
+  return String(safeGetVar("--favicon") || "").trim();
+}
+
+// -------------------------
+// Scheme preview (forces UI scheme for editor page)
+// -------------------------
 function setPreviewScheme(scheme) {
-  const root = document.documentElement;
+  const el = document.documentElement;
 
-  // your system: auto/light/dark
   if (scheme === "auto") {
-    delete root.dataset.scheme;
-    root.style.removeProperty("color-scheme");
+    delete el.dataset.scheme;
+    el.style.removeProperty("color-scheme");
   } else {
-    root.dataset.scheme = scheme;           // drives :root[data-scheme="dark"]
-    root.style.setProperty("color-scheme", scheme); // fixes Safari input text, etc.
+    el.dataset.scheme = scheme;
+    el.style.setProperty("color-scheme", scheme);
   }
 }
 
-function setSchemePreview(mode) {
-  state.schemePreview = mode;
-
-  // actually force the scheme (and Safari form behavior)
-  setPreviewScheme(mode);
-
-  updateStatus(mode === "auto" ? "Auto" : `Preview: ${mode}`);
-
-  // editing scheme should match what you're previewing
-  state.editingScheme =
-    mode === "auto" ? (isSystemDark() ? "dark" : "light") : mode;
-
-  // IMPORTANT: re-apply the right saved vars for whatever is now being previewed
-  clearManagedVars();
-  const saved = getSaved();
-  if (saved) applySavedToPage(saved);
-
-  renderControls();
-}
-
-function themeObjectFromUI() {
-  const light = {};
-  const dark = {};
-  document.querySelectorAll("[data-var][data-scope]").forEach((inp) => {
-    const k = inp.getAttribute("data-var");
-    const scope = inp.getAttribute("data-scope"); // light/dark
-    const v = (inp.value || "").trim();
-    if (!k || !scope || !v) return;
-    (scope === "dark" ? dark : light)[k] = v;
-  });
-
-  return {
-    mode: "auto",
-    light: { vars: light },
-    dark: { vars: dark },
-  };
-}
-
-function applySavedToPage(saved) {
+function applySavedToPage(saved, schemeOverride) {
   if (!saved) return;
 
-  // always follow auto on normal pages; editor can force via data-scheme
-  const scheme = isSystemDark() ? "dark" : "light";
+  const scheme =
+    schemeOverride === "dark" || schemeOverride === "light"
+      ? schemeOverride
+      : (isSystemDark() ? "dark" : "light");
+
   const vars = (scheme === "dark" ? saved.dark?.vars : saved.light?.vars) || {};
   applyVars(vars);
 }
 
-function buildSchemeRow() {
-  // insert a scheme row at top of the controls panel area
-  const controls = $("#controls");
-  if (!controls) return;
+// -------------------------
+// Draft + value resolution
+// -------------------------
+function getEditingValue(varName) {
+  const sch = state.editingScheme;
 
+  // 1) Draft wins (preview + live edits)
+  const d = state.draft?.[sch]?.[varName];
+  if (d && String(d).trim() !== "") return String(d).trim();
+
+  // 2) Saved next
+  const saved = getSaved();
+  const bucket = sch === "dark" ? saved?.dark?.vars : saved?.light?.vars;
+  const fromSaved = bucket?.[varName];
+  if (fromSaved && String(fromSaved).trim() !== "") return String(fromSaved).trim();
+
+  // 3) CSS computed fallback
+  return safeGetVar(varName);
+}
+
+function setDraftVar(scheme, varName, value) {
+  const sch = scheme === "dark" ? "dark" : "light";
+  if (!state.draft[sch]) state.draft[sch] = {};
+  const v = String(value ?? "").trim();
+  if (!v) delete state.draft[sch][varName];
+  else state.draft[sch][varName] = v;
+}
+
+// -------------------------
+// Scheme controls
+// -------------------------
+function setSchemePreview(mode) {
+  state.schemePreview = mode;
+
+  setPreviewScheme(mode);
+
+  updateStatus(mode === "auto" ? "Auto" : `Preview: ${mode}`);
+
+  state.editingScheme = mode === "auto" ? (isSystemDark() ? "dark" : "light") : mode;
+
+  // Re-apply saved + draft for correct scheme
+  const scheme = currentScheme();
+  clearManagedVars();
+
+  const saved = getSaved();
+  if (saved) applySavedToPage(saved, scheme);
+
+  // Draft overlay (if any)
+  applyVars(state.draft?.[scheme] || {});
+
+  // Favicon reflect current scheme (draft > saved > css)
+  const fav = getActiveFaviconColorFromDraftOrSavedOrCSS(scheme);
+  if (fav) previewFavicon(fav);
+
+  renderControls();
+}
+
+function buildSchemeRow(container) {
   const row = document.createElement("div");
   row.className = "scheme-row";
 
@@ -461,10 +355,12 @@ function buildSchemeRow() {
   row.appendChild(mkBtn("Light", "light"));
   row.appendChild(mkBtn("Dark", "dark"));
 
-  controls.appendChild(row);
+  container.appendChild(row);
 }
 
-// ✅ CHANGED: default collapsed
+// -------------------------
+// UI sections
+// -------------------------
 function makeSection(title, hint, expandedByDefault = false) {
   const sec = document.createElement("div");
   sec.className = "theme-section";
@@ -504,24 +400,16 @@ function makeSection(title, hint, expandedByDefault = false) {
 }
 
 function renderControls() {
-  const rootEl = $("#controls");
-  if (!rootEl) return;
+  const host = $("#controls");
+  if (!host) return;
 
-  rootEl.innerHTML = "";
+  host.innerHTML = "";
+  buildSchemeRow(host);
 
-  // Scheme preview controls (keep yours)
-  buildSchemeRow();
-
-  // Build sections with compact grids
   FIELD_GROUPS.forEach((group) => {
-    // ✅ CHANGED: always collapsed on first render
-    const sec = makeSection(
-      group.title,
-      `${group.hint}  •  Editing: ${state.editingScheme}`
-      // third arg omitted => collapsed by default
-    );
-
+    const sec = makeSection(group.title, `${group.hint}  •  Editing: ${state.editingScheme}`);
     const body = sec.querySelector(".theme-section-body");
+
     const grid = document.createElement("div");
     grid.className = "theme-grid";
 
@@ -537,7 +425,7 @@ function renderControls() {
           <div class="theme-var">${f.var}</div>
         </div>
         <div class="theme-inputrow">
-          <input class="theme-text" type="text" data-var="${f.var}" data-scope="${state.editingScheme}" value="${currentVal}">
+          <input class="theme-text" type="text" value="${currentVal}">
           ${
             f.pick
               ? `<input class="theme-color" type="color" value="${toHexish(currentVal)}">`
@@ -549,16 +437,28 @@ function renderControls() {
       const text = tile.querySelector(".theme-text");
       const picker = tile.querySelector(".theme-color");
 
-      text.addEventListener("input", () => {
-        root.style.setProperty(f.var, text.value.trim());
+      const commitLive = () => {
+        const v = text.value.trim();
+
+        // update CSS immediately
+        root.style.setProperty(f.var, v);
+
+        // update draft so Save commits the real current UI
+        setDraftVar(state.editingScheme, f.var, v);
+
         updateStatus("Live");
-        if (picker) picker.value = toHexish(text.value);
-      });
+        if (picker) picker.value = toHexish(v);
+
+        if (f.var === "--favicon") previewFavicon(v);
+      };
+
+      text.addEventListener("input", commitLive);
 
       if (picker) {
         picker.addEventListener("input", () => {
           const current = text.value.trim();
           const a = current.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([0-9.]+)\s*\)/i);
+
           if (a) {
             const hex = picker.value;
             const r = parseInt(hex.slice(1, 3), 16);
@@ -568,8 +468,8 @@ function renderControls() {
           } else {
             text.value = picker.value;
           }
-          root.style.setProperty(f.var, text.value.trim());
-          updateStatus("Live");
+
+          commitLive();
         });
       }
 
@@ -577,85 +477,221 @@ function renderControls() {
     });
 
     body.appendChild(grid);
-    rootEl.appendChild(sec);
+    host.appendChild(sec);
   });
 }
 
+// -------------------------
+// Presets UI (categorized)
+// Click = preview into draft + apply visually
+// -------------------------
 function buildPresets() {
-  const row = $("#presetRow");
-  if (!row) return;
+  const host = $("#presetRow");
+  if (!host) return;
 
-  row.innerHTML = "";
-  PRESETS.forEach((p) => {
-    const b = document.createElement("button");
-    b.className = "ghostbtn";
-    b.type = "button";
-    b.textContent = p.name;
-    b.addEventListener("click", () => {
-      // Apply preset to both schemes (but allow empty to mean “no changes”)
-      const saved = getSaved() || { mode: "auto", light: { vars: {} }, dark: { vars: {} } };
-      saved.light = { vars: { ...(saved.light?.vars || {}), ...(p.light || {}) } };
-      saved.dark = { vars: { ...(saved.dark?.vars || {}), ...(p.dark || {}) } };
-      setSaved(saved);
+  host.innerHTML = "";
 
-      // Apply based on current scheme
-      clearManagedVars();
-      applySavedToPage(saved);
-      renderControls();
-      updateStatus("Preset applied");
+  const order = [];
+  const map = new Map();
+
+  for (const p of PRESETS) {
+    const cat = (p.category || "Other").trim() || "Other";
+    if (!map.has(cat)) {
+      map.set(cat, []);
+      order.push(cat);
+    }
+    map.get(cat).push(p);
+  }
+
+  for (const cat of order) {
+    const list = map.get(cat) || [];
+    if (!list.length) continue;
+
+    const group = document.createElement("div");
+    group.className = "preset-group";
+
+    const head = document.createElement("div");
+    head.className = "preset-head";
+
+    const title = document.createElement("div");
+    title.className = "preset-title";
+    title.textContent = cat;
+
+    const count = document.createElement("div");
+    count.className = "preset-count";
+    count.textContent = `${list.length}`;
+
+    head.appendChild(title);
+    head.appendChild(count);
+
+    const row = document.createElement("div");
+    row.className = "preset-row";
+
+    list.forEach((p) => {
+      const b = document.createElement("button");
+      b.className = "presetbtn";
+      b.type = "button";
+      b.textContent = p.name;
+      b.title = p.description || p.name;
+
+      // selection identity
+      b.dataset.presetId = p.id;
+      if (state.lastPresetId && state.lastPresetId === p.id) {
+        b.classList.add("is-selected");
+      }
+
+      b.addEventListener("click", () => {
+        previewPreset(p);
+        markSelectedPreset(p.id);
+      });
+
+      row.appendChild(b);
     });
-    row.appendChild(b);
-  });
+
+    group.appendChild(head);
+    group.appendChild(row);
+    host.appendChild(group);
+  }
 }
 
+function previewPreset(p) {
+  const scheme = currentScheme();
+  const vars = scheme === "dark" ? (p.dark?.vars || {}) : (p.light?.vars || {});
+
+  // Push preset vars into draft (for this scheme)
+  state.draft[scheme] = { ...(vars || {}) };
+
+  // Re-apply everything: saved baseline + draft overlay
+  clearManagedVars();
+  const saved = getSaved();
+  if (saved) applySavedToPage(saved, scheme);
+  applyVars(state.draft[scheme]);
+
+  if (state.schemePreview !== "auto") setPreviewScheme(state.schemePreview);
+
+  const fav = vars?.["--favicon"];
+  if (fav) previewFavicon(fav);
+
+  renderControls();
+  updateStatus("Previewing preset");
+}
+
+// -------------------------
+// Save / Reset
+// -------------------------
 function saveTheme() {
-  const obj = themeObjectFromUI();
+  const existing =
+    getSaved() || { mode: "auto", light: { vars: {} }, dark: { vars: {} } };
 
-  // merge with existing so you don't wipe the other scheme accidentally
-  const existing = getSaved() || { mode: "auto", light: { vars: {} }, dark: { vars: {} } };
-  existing.light = { vars: { ...(existing.light?.vars || {}), ...(obj.light?.vars || {}) } };
-  existing.dark = { vars: { ...(existing.dark?.vars || {}), ...(obj.dark?.vars || {}) } };
-  existing.mode = "auto";
-  setSaved(existing);
+  // Merge draft into saved for BOTH schemes (only changes where draft has keys)
+  const nextLight = {
+    ...(existing.light?.vars || {}),
+    ...(state.draft.light || {})
+  };
+  const nextDark = {
+    ...(existing.dark?.vars || {}),
+    ...(state.draft.dark || {})
+  };
 
+  const next = {
+    mode: "auto",
+    light: { vars: nextLight },
+    dark: { vars: nextDark }
+  };
+
+  setSaved(next);
+
+  // After save, keep draft as-is (so user can keep tweaking without surprises)
+  const scheme = currentScheme();
+  clearManagedVars();
+  applySavedToPage(next, scheme);
+  applyVars(state.draft?.[scheme] || {});
+
+  const fav = getActiveFaviconColorFromDraftOrSavedOrCSS(scheme);
+  if (fav) previewFavicon(fav);
+
+  renderControls();
   updateStatus("Saved");
 }
 
 function resetTheme() {
   const ok = confirm("Reset theme to defaults for this browser?");
   if (!ok) return;
+
   localStorage.removeItem(THEME_KEY);
   clearManagedVars();
   delete root.dataset.scheme;
+
   state.schemePreview = "auto";
   state.editingScheme = isSystemDark() ? "dark" : "light";
+  state.draft.light = {};
+  state.draft.dark = {};
+  state.lastPresetId = null;
+
+  try {
+    sessionStorage.removeItem("theme.lastPresetId");
+  } catch {}
+
+  clearFaviconPreview();
+
   renderControls();
   updateStatus("Default");
 }
 
-(function init() {
+// -------------------------
+// Init
+// -------------------------
+(async function init() {
   window.renderVersionBadge?.();
 
-  // Apply saved theme immediately
-  const saved = getSaved();
-  if (saved) applySavedToPage(saved);
+  // restore last selected preset (session only)
+  try {
+    const id = sessionStorage.getItem("theme.lastPresetId");
+    if (id) state.lastPresetId = id;
+  } catch {}
 
-  buildPresets();
+  // init state
+  state.editingScheme = currentScheme();
+
+  // apply saved theme for current scheme
+  const saved = getSaved();
+  if (saved) applySavedToPage(saved, currentScheme());
+
+  // favicon at boot
+  const fav = getActiveFaviconColorFromDraftOrSavedOrCSS(currentScheme());
+  if (fav) previewFavicon(fav);
+
+  // load presets
+  try {
+    await loadPresets();
+    buildPresets();
+  } catch (e) {
+    console.error(e);
+    updateStatus("Preset load failed");
+  }
+
   renderControls();
 
-  // Wire buttons
   $("#saveBtn")?.addEventListener("click", saveTheme);
   $("#resetBtn")?.addEventListener("click", resetTheme);
 
-  // Keep editor honest if system scheme flips while open
+  // system scheme flip while auto
   try {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     mq.addEventListener("change", () => {
       if (state.schemePreview === "auto") {
+        state.editingScheme = currentScheme();
+
         clearManagedVars();
         const s = getSaved();
-        if (s) applySavedToPage(s);
-        state.editingScheme = isSystemDark() ? "dark" : "light";
+        if (s) applySavedToPage(s, currentScheme());
+
+        // overlay draft for whichever scheme is now active
+        applyVars(state.draft?.[currentScheme()] || {});
+
+        const f = getActiveFaviconColorFromDraftOrSavedOrCSS(currentScheme());
+        if (f) previewFavicon(f);
+
         renderControls();
         updateStatus("Auto");
       }
