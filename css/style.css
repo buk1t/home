@@ -31,6 +31,12 @@ html[data-preview="light"] {
   color-scheme: light;
 }
 
+/* ---------- Favicon ---------- */
+
+:root {
+  --favicon: #4c91b3;
+}
+
 /* ---------- FORCE LIGHT ---------- */
 :root[data-scheme="light"],
 :root[data-preview="light"],
