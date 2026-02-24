@@ -1,10 +1,4 @@
 // theme-apply.js
-// Applies saved theme vars to *any* page (home, settings, etc).
-// Fixes desktop light/dark desync by:
-// - reapplying on prefers-color-scheme changes (Auto)
-// - reapplying when html[data-scheme] changes (manual preview/toggle)
-// - reapplying on storage changes (other tab / settings)
-// Also updates favicon via window.BUK1T_FAVICON (your favicon watcher).
 
 (() => {
   const THEME_KEY = "home.theme.v1";

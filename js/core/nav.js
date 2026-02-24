@@ -1,9 +1,5 @@
-// /js/nav.js
-// Minimal bottom-right expanding nav dock.
-// - Collapsed: a small "..." launcher (always fully on-screen)
-// - Expanded: pill expands LEFT (never sticks out right)
-// - Click launcher toggles, click outside closes, ESC closes
-// - Active page gets subtle ring
+//nav.js
+
 
 (() => {
   const DEFAULT_ITEMS = [

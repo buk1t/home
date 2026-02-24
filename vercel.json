@@ -1,14 +1,7 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
-    { "source": "/", "destination": "/html/index.html" },
-
-    { "source": "/settings", "destination": "/html/settings.html" },
-    { "source": "/settings/", "destination": "/html/settings.html" },
-
-    { "source": "/theme", "destination": "/html/theme.html" },
-    { "source": "/theme/", "destination": "/html/theme.html" },
-
-    { "source": "/changelog", "destination": "/html/changelog.html" },
-    { "source": "/changelog/", "destination": "/html/changelog.html" }
+    { "source": "/:path*", "destination": "/404.html" }
   ]
 }

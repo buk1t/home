@@ -1,6 +1,6 @@
 <!-- /settings.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-page="settings">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -28,7 +28,7 @@
       })();
     </script>
 
-    <script src="/js/theme-apply.js"></script>
+    <script type="module" src="/js/core/boot.js"></script>
     <link rel="stylesheet" href="/css/style.css" />
 
     <script
@@ -122,7 +122,33 @@
 
             <div id="linksList" style="margin-top: 12px"></div>
           </div>
+        </section>
 
+        <aside class="right">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Archive</div>
+
+              <div style="display: flex; gap: 10px; align-items: center">
+                <button class="ghostbtn" id="archiveRefreshBtn" type="button">
+                  Refresh
+                </button>
+                <button class="ghostbtn" id="archiveClearBtn" type="button">
+                  Clear all
+                </button>
+              </div>
+            </div>
+
+            <div class="panel-sub">
+              Completed tasks live here. Restore or delete.
+            </div>
+
+            <div
+              class="archive-list"
+              id="archiveList"
+              style="margin-top: 12px"
+            ></div>
+          </div>
           <div class="panel" style="margin-top: 14px">
             <div class="panel-head">
               <div class="panel-title">Import / Export</div>
@@ -153,40 +179,8 @@
               style="margin-top: 10px"
             ></div>
           </div>
-        </section>
-
-        <aside class="right">
-          <div class="panel">
-            <div class="panel-head">
-              <div class="panel-title">Archive</div>
-
-              <div style="display: flex; gap: 10px; align-items: center">
-                <button class="ghostbtn" id="archiveRefreshBtn" type="button">
-                  Refresh
-                </button>
-                <button class="ghostbtn" id="archiveClearBtn" type="button">
-                  Clear all
-                </button>
-              </div>
-            </div>
-
-            <div class="panel-sub">
-              Completed tasks live here. Restore or delete.
-            </div>
-
-            <div
-              class="archive-list"
-              id="archiveList"
-              style="margin-top: 12px"
-            ></div>
-          </div>
         </aside>
       </div>
     </main>
-
-    <script src="/js/nav.js"></script>
-    <script src="/js/version.js"></script>
-    <script src="/js/icons.js"></script>
-    <script src="/js/settings.js"></script>
   </body>
 </html>

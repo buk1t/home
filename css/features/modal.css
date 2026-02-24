@@ -1,0 +1,95 @@
+/* /css/features/modal.css */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 999;
+}
+
+.modal[aria-hidden="false"] {
+  display: block;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.modal-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 36px));
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+  padding: 14px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-title {
+  font-weight: 750;
+  font-size: 16px;
+}
+
+.modal-sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.archive-list {
+  margin-top: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+}
+
+.archive-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--stroke) 70%, transparent 30%);
+}
+
+.archive-row:last-child {
+  border-bottom: none;
+}
+
+.archive-text {
+  color: color-mix(in srgb, var(--text) 92%, transparent 8%);
+  font-size: 14px;
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.archive-btn {
+  appearance: none;
+  border: 1px solid var(--stroke);
+  background: var(--surface-quiet);
+  border-radius: 999px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.archive-btn:hover {
+  border-color: var(--stroke-strong);
+}
